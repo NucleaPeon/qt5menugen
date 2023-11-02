@@ -52,8 +52,8 @@ public:
     QtMenuGen();
 
     static bool loadFile(QUrl def);
-    static void setupToolBarOn(QFile *definition, QWidget *widget = 0, QObject *slotobj = 0);
-    static void setupToolBarOn(QFile *definition, QMainWindow *window = 0, QObject *slotobj = 0);
+    static void setupToolBarOn(QFile *definition, QWidget *widget, QObject *slotobj = 0);
+    static void setupToolBarOn(QFile *definition, QMainWindow *window, QObject *slotobj = 0);
 
     /*!
      * \brief actionByName Retrieves a QAction based on name defined in the menu_defs.json

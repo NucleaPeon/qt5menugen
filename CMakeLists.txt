@@ -38,7 +38,7 @@ endif()
 set_target_properties(qt5menugen PROPERTIES VERSION ${PROJECT_VERSION}
 	SOVERSION 1
 )
-set_target_properties(qt5menugen PROPERTIES PUBLIC_HEADER "qt5menugen.h")
+set_target_properties(qt5menugen PROPERTIES PUBLIC_HEADER "${QT5MENUGEN_HEADERS}")
 configure_file(qt5menugen.pc.in qt5menugen.pc @ONLY)
 
 install(TARGETS qt5menugen

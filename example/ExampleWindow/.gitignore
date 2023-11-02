@@ -1,0 +1,4 @@
+*.pro
+*.pro.*
+.DS_Store
+build/

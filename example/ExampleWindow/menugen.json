@@ -1,0 +1,81 @@
+[
+    {
+        "name": "&File",
+        "actions": [
+            {
+                "name": "new",
+                "text": "&New",
+                "shortcut": "Ctrl+N",
+                "icon": ":/icons/document-new.png",
+                "slot": "new()"
+            },
+            {
+                "name": "open",
+                "text": "&Open",
+                "shortcut": "Ctrl+O",
+                "icon": ":/icons/document-open.png",
+                "slot": "open()"
+            },
+            {
+                "separator": true
+            },
+            {
+                "name": "save",
+                "text": "&Save",
+                "shortcut": "Ctrl+S",
+                "icon": ":/icons/document-save.png",
+                "slot": "save()"
+            },
+            {
+                "name": "save-as",
+                "text": "Save &As",
+                "shortcut": "Ctrl+Shift+S",
+                "icon": ":/icons/document-save-as.png",
+                "slot": "saveAs()"
+            },
+            {
+                "separator": true
+            },
+            {
+                "name": "print",
+                "text": "&Print",
+                "shortcut": "Ctrl+P",
+                "icon": ":/icons/document-print.png",
+                "slot": "print()"
+            },
+            {
+                "name": "quit",
+                "text": "&Quit",
+                "toolbar_hidden": true,
+                "shortcut": "Ctrl+Q",
+                "icon": ":/icons/document-close.png",
+                "slot": "close()",
+                "comment": "This will be applied to mac osx application menu automatically."
+            }
+
+        ]
+    },
+    {
+        "name": "&Edit",
+        "actions": [
+            {
+                "name": "preferences",
+                "text": "&Preferences",
+                "shortcut": "Ctrl+Shift+P",
+                "toolbar_hidden": true,
+                "slot": "showPreferencesModal()"
+            }
+        ]
+    },
+    {
+        "name": "&Help",
+        "actions": [
+            {
+                "name": "about",
+                "text": "&About",
+                "toolbar_hidden": true,
+                "slot": "showAboutModal()"
+            }
+        ]
+    }
+]

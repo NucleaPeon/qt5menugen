@@ -65,7 +65,6 @@ public:
 
     static QMenuBar *setupMenus(QWidget *widget);
 #ifdef Q_OS_WIN
-    // UNTESTED
     static QWinThumbnailToolBar* setupWindowsToolBar(QWidget *widget, QObject *slotobj);
 #endif
 #ifdef Q_OS_LINUX

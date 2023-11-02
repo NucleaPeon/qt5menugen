@@ -9,12 +9,12 @@ find_package(Qt5 REQUIRED
 )
 
 list(APPEND QT5MENUGEN_HEADERS
-	qt5menugen.h
-	qt5menugen_global.h
+	src/qt5menugen.h
+	src/qt5menugen_global.h
 )
 
 list(APPEND QT5MENUGEN_SOURCES
-	qt5menugen.cpp
+	src/qt5menugen.cpp
 )
 
 add_library(qt5menugen SHARED
@@ -39,11 +39,11 @@ set_target_properties(qt5menugen PROPERTIES VERSION ${PROJECT_VERSION}
 	SOVERSION 1
 )
 set_target_properties(qt5menugen PROPERTIES PUBLIC_HEADER "${QT5MENUGEN_HEADERS}")
-configure_file(qt5menugen.pc.in qt5menugen.pc @ONLY)
+configure_file(src/qt5menugen.pc.in src/qt5menugen.pc @ONLY)
 
 install(TARGETS qt5menugen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-install(FILES ${CMAKE_BINARY_DIR}/qt5menugen.pc DESTINATION
+install(FILES ${CMAKE_BINARY_DIR}/src/qt5menugen.pc DESTINATION
 	${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)

@@ -15,8 +15,9 @@ endif()
 
 # find_library(qt5menugen HINTS "/usr/lib" "/usr/local/lib" REQUIRED )
 # find_library(CMAKE_LIBRARY_PATH qt5menugen HINTS "/usr/local/lib" "/usr/lib")
-
-include_directories(${PROJECT_SOURCE_DIR})
+message(STATUS ${CMAKE_PREFIX_PATH})
+#find_package(qt5menugen CONFIG REQUIRED)
+# include_directories(${PROJECT_SOURCE_DIR})
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -47,14 +48,13 @@ list(APPEND EXAMPLE_WINDOW_RES
 )
 
 
-#target_link_libraries(${PROJECT_NAME} -lqt5menugen)
 #
 if (APPLE)
 	list(APPEND EXAMPLE_WINDOW_HEADERS cocoainitializer.h)
 	list(APPEND EXAMPLE_WINDOW_SOURCES cocoainitializer.mm)
 	add_custom_target(OTHER_FILES SOURCES ${OTHER_TARGETS})
 
-	add_executable(${PROJECT_NAME} MACOSX_BUNDLE
+	add_executable(examplewindow MACOSX_BUNDLE
 		${OTHER_FILES}
 		main.cpp
 		${EXAMPLE_WINDOW_HEADERS}
@@ -62,7 +62,7 @@ if (APPLE)
 		${EXAMPLE_WINDOW_UIS}
 		${EXAMPLE_WINDOW_RES}
 	)
-	target_sources(${PROJECT_NAME} PRIVATE
+	target_sources(examplewindow PRIVATE
 		${OTHER_TARGETS}
 	)
 	set_source_files_properties(
@@ -70,35 +70,36 @@ if (APPLE)
 		PROPERTIES
 		MACOSX_PACKAGE_LOCATION Resources/
 	)
-	set_target_properties(${PROJECT_NAME} PROPERTIES
+	set_target_properties(examplewindow PROPERTIES
 		BUNDLE TRUE
 		MACOSX_BUNDLE_GUI_IDENTIFIER org.peondevelopments.examplewindow
-		MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
+		MACOSX_BUNDLE_BUNDLE_NAME ExampleWindow
 		MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
 		MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
 	)
 
-elseif()
-	add_executable(${PROJECT_NAME}
-		main.cpp
-		${QJSONIFY_HEADERS}
-		${QJSONIFY_SOURCES}
-		${QJSONIFY_UIS}
-		${QJSONIFY_RES}
+else()
+	add_executable(examplewindow
 		${OTHER_FILES}
+		main.cpp
+		${EXAMPLE_WINDOW_HEADERS}
+		${EXAMPLE_WINDOW_SOURCES}
+		${EXAMPLE_WINDOW_UIS}
+		${EXAMPLE_WINDOW_RES}
 	)
 endif()
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets qt5menugen)
+target_link_libraries(examplewindow Qt5::Widgets Qt5::Core)
+target_link_libraries(examplewindow qt5menugen)
 if(APPLE)
-	set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
+	set_target_properties(examplewindow PROPERTIES LINK_FLAGS
 		 "-Wl,-F/Library/Frameworks")
-	target_link_libraries(${PROJECT_NAME} stdc++
+	target_link_libraries(examplewindow stdc++
 		"-framework Cocoa"
 		objc
 	)
-	target_link_libraries(${PROJECT_NAME} Qt5::MacExtras)
+	target_link_libraries(examplewindow Qt5::MacExtras)
 elseif(MSVC)
-	target_link_libraries(${PROJECT_NAME} Qt5::WinExtras)
+	target_link_libraries(examplewindow Qt5::WinExtras)
 	QT5_WRAP_UI( UI_HEADERS ${QJSONIFY_UIS} )
 endif()

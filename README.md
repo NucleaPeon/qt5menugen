@@ -13,19 +13,19 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/NucleaPeon/QJsonify">
-    <img src="icons/qjsonify-512x512.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/NucleaPeon/qt5menugen">
+    <!--<img src="icons/qjsonify-512x512.png" alt="Logo" width="80" height="80">-->
   </a>
 
-  <h3 align="center">QJsonify</h3>
+  <h3 align="center">qt5menugen</h3>
 
   <p align="center">
-    Prettify and Minify your JSON files locally. Don't give out your precious information to online sources.
+    Library that builds out Menus and Toolbars for Windows, Linux and OS X using a JSON file
     <br />
     <br />
-    <a href="https://github.com/NucleaPeon/QJsonify/issues">Report Bug</a>
+    <a href="https://github.com/NucleaPeon/qt5menugen/issues">Report Bug</a>
     ·
-    <a href="https://github.com/NucleaPeon/QJsonify/issues">Request Feature</a>
+    <a href="https://github.com/NucleaPeon/qt5menugen/issues">Request Feature</a>
   </p>
 </div>
 
@@ -60,26 +60,16 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+<!--
+[![qt5menugen on Linux][product-screenshot-linux]](https://github.com/NucleaPeon/qt5menugen)
+[![qt5menugen on OS X Snow Leopard][product-screenshot-osx]](https://github.com/NucleaPeon/QJsonify)
+[![qt5menugen on Windows 7][product-screenshot-win7]](https://github.com/NucleaPeon/QJsonify)
+-->
+``qt5menugen``: Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file. Instead of having many QMenu and QAction declarations in your qt5 c++ header files, this allows initialization and retrieval of QActions in one statement. Library comes with an example project to see how it is used.
 
-[![QJsonify on Linux][product-screenshot-linux]](https://github.com/NucleaPeon/QJsonify)
-[![QJsonify on OS X Snow Leopard][product-screenshot-osx]](https://github.com/NucleaPeon/QJsonify)
-[![QJsonify on Windows 7][product-screenshot-win7]](https://github.com/NucleaPeon/QJsonify)
+### Oxygen Icon Licensing
 
-_A Windows XP and 7 version are planned._
-
-QJsonify is a project that aims to help developers keep their data local. There are many great online JSON minifiers and prettifiers, but all that functionality is easily accessible within the Qt5 Framework and this avoids submitting data across the network.
-
-It's faster and more secure, you can toggle quickly between minified and prettified forms as well as print and export said json files in a couple clicks.
-
-This project includes Oxygen Icons <a href="https://techbase.kde.org/Projects/Oxygen/Licensing">https://techbase.kde.org/Projects/Oxygen/Licensing</a> which are licensed under the LGPL v3 (see LICENSE-LGPL3 file). All files under this license are located in the ``icons/`` directory except jsonify-* files which I created for the program logo. These also can be licensed under the LGPL v3.
-
-The oxygen repo is old when checked out, some svg/svgz files may not be available for inclusion with the project. Latest commit is ``bff159d338fe08be09146a5ee17b9b6efa8a2c8d``. See https://github.com/KDE/oxygen-icons for latest repo commits.
-
-Files not included:
-
-* format-line-spacing-normal.svg*
-* format-line-spacing-triple.svg*
-
+This project includes Oxygen Icons <a href="https://techbase.kde.org/Projects/Oxygen/Licensing">https://techbase.kde.org/Projects/Oxygen/Licensing</a> which are licensed under the LGPL v3 (see LICENSE-LGPL3 file). All files under this license are located in the ``example/ExampleWindow/*.png`` directory.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -92,15 +82,15 @@ It is also tested using Qt5.15 on Linux amd64.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
 Clone the repo:
 
 ```sh
-    git clone https://github.com/NucleaPeon/QJsonify.git
+    git clone https://github.com/NucleaPeon/qt5menugen.git
 ```
+
 
 ### Prerequisites
 
@@ -126,102 +116,53 @@ You will need:
 
 * Using cmake on Linux or Mac:
 
-    ```sh
-	cd  build/
-	cmake ..
-	make
-	```
-
-* For linux:
-
-    ```sh
-    cd QJsonify
-    qmake -r
-    make
-    ```
-
-* For Mac:
-
-    ```sh
-    cd QJsonify
-    qmake -r
-    make
-    ```
-
-    Then drag and drop the resulting QJsonify.app/ folder into your Applications folder.
+  ```sh
+      cd build/
+      cmake -DCMAKE_INSTALL_PREFIX=/usr/ ..
+      make -j2
+      sudo make install
+  ```
 
 * For Windows 7 on Visual Studio 2013
 
-Easiest way is to open project in Qt Creator and build, then navigate to directory, copy over .dll's or run ``windeployqt QJsonify.exe``
 
-For ``cmake`` use Git Bash on main project directory. Not specifying the ``Configuration`` parameter will build the Debug release by default:
+TODO
+<!--
 	```sh
 	cd build
 	cmake ..
 	# Define Debug or Release for build type. "//" to specify an option is required for git bash, but only "/" for cmd.exe or powershell.
-	MSBuild.exe QJsonify.sln //p:Configuration="Debug"
+	MSBuild.exe qJsonify.sln //p:Configuration="Debug"
 	windeployqt Debug/QJsonify.exe
 	```
-	
 Compress the Release/ or Debug/ directory and distribute.
+  -->
 	
 
-Slightly less easy way and one I'm not supporting is using ``qmake`` on the command line:
-
-	```sh
-	qmake -r
-	jom.exe -f Makefile.Release
-	windeployqt QJsonify.exe
-	```
-	
-	or use VS nmake (not as optimized for multi-core)
-	
-	```sh
-	qmake -r
-	nmake.exe -f Makefile.Release
-	windeployqt QJsonify.exe
-	```
-	
-I couldn't get things to compile, so perhaps my environmental variables were not set up correctly. It would fail looking for "utility".
-If you want to try the above method, you can view your Environmental Variables in Qt Creator -> Projects sidebar button and make sure
-everything is set up correctly.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- USAGE EXAMPLES -->
 ## Usage
 
-* Use the ``Open`` action to load your ``.json`` file.
-* Select Minify or Prettify
-* Print or Export the output to file.
+Once the library is installed, you can access it via qmake by including this code:
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
+```cmake
+  target_link_libraries(${PROJECT_NAME} Qt5::Widgets qt5menugen)
+```
 
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Remote file read and write
-- [ ] Compile for, and add Windows 7 binary
-- [ ] Implement Recent Files menu and have ability to clear it
-- [ ] Use CMake as the build system instead of qmake
+- [ ] Improve documentation
+- [ ] Add/release static versions or include instructions and qt5 5.3.2 statically compiled binaries
 - [ ] Create a debian release package
-- [ ] Show statistics between prettified and minified file sizes
-- [ ] Have an editor button to allow system editor to edit json file
+- [ ] Create a gentoo guru ebuild
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- CONTRIBUTING -->
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-Please remember to avoid any c++11 code and any Qt 5.4.0+ introduced functions for ``Q_OS_MAC`` def blocks as this project must be compatible with Snow Leopard (OS X 10.6.8).
+Please remember to avoid any c++11 code and any Qt 5.4.0+ introduced functions should have Qt 5.3.2 versions defined for Snow Leopard compatibility.
 
 If you have a suggestion that would make this better, either create an issue with your idea(s) or fork the repo and create a pull request.
 
@@ -234,7 +175,9 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the GPL v3.0 License. See `LICENSE` for more information.
+Distributed under the GPL v2.0 License. See `LICENSE` for more information.
+
+I am purposefully using a more liberal GNU License for libraries to encourage adoption.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

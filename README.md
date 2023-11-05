@@ -13,10 +13,6 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/NucleaPeon/qt5menugen">
-    <!--<img src="icons/qjsonify-512x512.png" alt="Logo" width="80" height="80">-->
-  </a>
-
   <h3 align="center">qt5menugen</h3>
 
   <p align="center">
@@ -29,6 +25,9 @@
   </p>
 </div>
 
+<a href="https://github.com/NucleaPeon/qt5menugen">
+    <img src="qt5menugen-promo.png" alt="Promo">
+</a>
 
 
 <!-- TABLE OF CONTENTS -->
@@ -60,12 +59,43 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-<!--
-[![qt5menugen on Linux][product-screenshot-linux]](https://github.com/NucleaPeon/qt5menugen)
-[![qt5menugen on OS X Snow Leopard][product-screenshot-osx]](https://github.com/NucleaPeon/QJsonify)
-[![qt5menugen on Windows 7][product-screenshot-win7]](https://github.com/NucleaPeon/QJsonify)
--->
-``qt5menugen``: Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file. Instead of having many QMenu and QAction declarations in your qt5 c++ header files, this allows initialization and retrieval of QActions in one statement. Library comes with an example project to see how it is used.
+``qt5menugen``: Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file.
+
+Instead of having many QMenu and QAction declarations in your qt5 c++ header files, this allows initialization and retrieval of QActions in one statement. Library comes with an example project to see how it is used.
+
+### Quickstart
+
+Using this library requires that you:
+
+* Have a .json file included in your project and abides by the specification (todo, see existing ``example/`` json file and later, the appropriate documentation).
+* Include icons if applicable
+* Make the single call to set up the QMenu and Q{Mac}ToolBar with the QFile parameter
+
+Slots are handled by writing out the method as a string in the json file, then expecting that method to be on the object that contains the toolbar/menus. 
+Currently we support this on ``QWidget``'s and ``QMainWindow``'s. 
+
+A super easy example is a QAction that closes the application.
+
+```
+[
+    {
+        "name": "&File",
+        "actions": [
+        		{
+            	"name": "quit",
+           	"text": "&Quit",
+          	"toolbar_hidden": true,
+                "shortcut": "Ctrl+Q",
+                "icon": ":/icons/dialog-close.png",
+                "slot": "close()",
+                "comment": "This will be applied to mac osx application menu automatically."
+            },
+        ]
+    }
+]
+```
+
+Essentially ``"slot": "close()"`` calls the mainwindow's close() slot (it already exists) and so this handles icon/shortcut/QAction/QMenu and if desired, a QToolBar item (QAction or QMacToolBarItem).
 
 ### Oxygen Icon Licensing
 
@@ -141,16 +171,28 @@ Compress the Release/ or Debug/ directory and distribute.
 
 ## Usage
 
-Once the library is installed, you can access it via qmake by including this code:
+Once the library is installed, you can access it via qmake by including this code after the ``add_executable()`` command:
 
 ```cmake
   target_link_libraries(${PROJECT_NAME} Qt5::Widgets qt5menugen)
+```
+
+See the included ``example/`` project for including it in a project.
+
+**Currently have only built this as a dynamic/shared library; library must be installed before this will succeed.**
+
+```sh
+  cd example/ExampleWindow/build
+  cmake ..
+  make
+  ./examplewindow
 ```
 
 <!-- ROADMAP -->
 ## Roadmap
 
 - [ ] Improve documentation
+- [ ] Allow QUrl's to be passed in, even if it means converting them to QFile and not allowing remote files to be used.
 - [ ] Add/release static versions or include instructions and qt5 5.3.2 statically compiled binaries
 - [ ] Create a debian release package
 - [ ] Create a gentoo guru ebuild
@@ -196,6 +238,4 @@ Thanks to the <a href="https://github.com/othneildrew/Best-README-Template">http
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[product-screenshot-linux]: images/qjsonify-linux.png
-[product-screenshot-osx]: images/qjsonify-osx.png
-[product-screenshot-win7]: images/qjsonify-win7.png
+

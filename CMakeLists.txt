@@ -7,6 +7,7 @@ project(qt5menugen
 find_package(Qt5 REQUIRED
     Widgets
 )
+include(GNUInstallDirs)  # REQUIRED TO INSTALL PKGCONFIG TO PROPER DIR!
 
 list(APPEND QT5MENUGEN_HEADERS
 	src/qt5menugen.h
@@ -18,8 +19,8 @@ list(APPEND QT5MENUGEN_SOURCES
 )
 
 add_library(qt5menugen SHARED
-       ${QT5MENUGEN_HEADERS}
-       ${QT5MENUGEN_SOURCES}
+	${QT5MENUGEN_HEADERS}
+	${QT5MENUGEN_SOURCES}
 )
 
 target_link_libraries(qt5menugen Qt5::Widgets)
@@ -33,8 +34,6 @@ elseif(MSVC)
 	set(Qt5_DIR "C:/Qt/Qt5.3.2/5.3/msvc2013_64_opengl/")
 	find_package(Qt5 COMPONENTS WinExtras REQUIRED)
 	target_link_libraries(qt5menugen Qt5::WinExtras)
-else()
-	include(GNUInstallDirs)
 endif()
 
 set_target_properties(qt5menugen PROPERTIES VERSION ${PROJECT_VERSION}
@@ -47,4 +46,7 @@ install(TARGETS qt5menugen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-install(FILES ${CMAKE_BINARY_DIR}/src/qt5menugen.pc DESTINATION	"${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig")
+message(STATUS "${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig")
+
+install(FILES ${CMAKE_BINARY_DIR}/src/qt5menugen.pc DESTINATION
+	${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)

@@ -48,6 +48,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#knownissues">Known Issues</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -187,6 +188,14 @@ See the included ``example/`` project for including it in a project.
   make
   ./examplewindow
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Known Issues
+
+* This library contains its own pkgconfig .pc file to allow find_package() to function. By default, it will be installed to ``/usr/local/share/pkgconfig`` even on OSX. It's possible that OSX expects /usr/lib/pkgconfig, so either use ``-DCMAKE_INSTALL_DATAROOTDIR="usr/lib"``. If this affects you, file an issue. It may be better to manually configure APPLE systems to use different directories.
+ 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ROADMAP -->
 ## Roadmap

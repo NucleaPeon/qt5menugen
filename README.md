@@ -72,8 +72,8 @@ Using this library requires that you:
 * Include icons if applicable
 * Make the single call to set up the QMenu and Q{Mac}ToolBar with the QFile parameter
 
-Slots are handled by writing out the method as a string in the json file, then expecting that method to be on the object that contains the toolbar/menus. 
-Currently we support this on ``QWidget``'s and ``QMainWindow``'s. 
+Slots are handled by writing out the method as a string in the json file, then expecting that method to be on the object that contains the toolbar/menus.
+Currently we support this on ``QWidget``'s and ``QMainWindow``'s.
 
 A super easy example is a QAction that closes the application.
 
@@ -128,7 +128,7 @@ Clone the repo:
 You will need:
 * git
 * cmake (for CMake builds)
-* clang >= 3 OR g++ >= 4.2 OR msvc 
+* clang >= 3 OR g++ >= 4.2 OR msvc
 * make (OS X and Linux)
 * Qt5 >= 5.3.2 (Though 5.3.1 **may** also be acceptable)
 * For Windows 7:
@@ -168,7 +168,7 @@ TODO
 	```
 Compress the Release/ or Debug/ directory and distribute.
   -->
-	
+
 
 ## Usage
 
@@ -194,7 +194,7 @@ See the included ``example/`` project for including it in a project.
 ## Known Issues
 
 * This library contains its own pkgconfig .pc file to allow find_package() to function. By default, it will be installed to ``/usr/local/share/pkgconfig`` even on OSX. It's possible that OSX expects /usr/lib/pkgconfig, so either use ``-DCMAKE_INSTALL_DATAROOTDIR="usr/lib"``. If this affects you, file an issue. It may be better to manually configure APPLE systems to use different directories.
- 
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ROADMAP -->
@@ -205,6 +205,7 @@ See the included ``example/`` project for including it in a project.
 - [ ] Add/release static versions or include instructions and qt5 5.3.2 statically compiled binaries
 - [ ] Create a debian release package
 - [ ] Create a gentoo guru ebuild
+- [ ] Automatic testing, especially of shortcut resolution (multiple shortcuts and their int result values), use || to enable multiple shortcuts for one action (esp. when a shortcut is specific to one platform/OS)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

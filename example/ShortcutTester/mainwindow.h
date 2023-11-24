@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QAction>
 #include "qt5menugen.h"
 
 
@@ -20,6 +21,7 @@ public:
 
 private slots:
     void checkShortcut();
+    void itworks();
 
 private:
     Ui::MainWindow *ui;

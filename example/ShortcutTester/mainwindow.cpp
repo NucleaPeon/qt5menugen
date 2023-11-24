@@ -2,13 +2,23 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QMap>
+#include <QFile>
+#include <QShortcut>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    QFile def(":/menu.json");
+    QtMenuGen::setupToolBarOn(&def, this, this);
     connect(ui->btncheck, SIGNAL(clicked()), this, SLOT(checkShortcut()));
+    QAction* act = QtMenuGen::actionByName("test");
+    QMap<QString, int> shortcuts = QtMenuGen::load_shortcuts();
+    QKeySequence seq(shortcuts.value("QKeySequence::Underline"));
+    QShortcut *sc = new QShortcut(seq, this);
+    connect(sc, SIGNAL(activated()), this, SLOT(itworks()));
+    qDebug() << act->shortcuts();
 }
 
 MainWindow::~MainWindow()
@@ -40,10 +50,48 @@ void MainWindow::checkShortcut()
         }
     }
     if (valid) {
+        QAction* act = QtMenuGen::actionByName("test");
+        qDebug() << act;
+        QKeySequence seq;
+        qDebug() << lst;
+        switch(lst.size()) {
+            case 1:
+                qDebug() << lst.at(0) << shortcuts.value(lst.at(0), 0);
+                seq = QKeySequence(shortcuts.value(lst.at(0), 0));
+                break;
+            case 2:
+                qDebug() << lst.at(0) << shortcuts.value(lst.at(0), 0);
+                qDebug() << lst.at(1) << shortcuts.value(lst.at(1), 0);
+                seq = QKeySequence(shortcuts.value(lst.at(0), 0),
+                                   shortcuts.value(lst.at(1), 0));
+                break;
+            case 3:
+                seq = QKeySequence(shortcuts.value(lst.at(0), 0),
+                                   shortcuts.value(lst.at(1), 0),
+                                   shortcuts.value(lst.at(2), 0));
+                break;
+            case 4:
+                seq = QKeySequence(shortcuts.value(lst.at(0), 0),
+                                   shortcuts.value(lst.at(1), 0),
+                                   shortcuts.value(lst.at(2), 0),
+                                   shortcuts.value(lst.at(3), 0));
+                break;
+
+        }
+        act->setShortcut(seq);
+        qDebug() << seq;
         QMessageBox msgBox;
-        QString msg = QString("%1 is a valid shortcut!").arg(shortcut);
+        QString msg = QString("%1 is a valid shortcut! It is now assigned to the QAction, try it out!").arg(shortcut);
         msgBox.setText(msg);
         msgBox.exec();
+        qDebug() << act->shortcut();
     }
 
+}
+
+void MainWindow::itworks()
+{
+    QMessageBox msgBox;
+    msgBox.setText("It works!");
+    msgBox.exec();
 }

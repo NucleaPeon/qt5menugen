@@ -46,10 +46,12 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = ../main.cpp \
-		../mainwindow.cpp moc_mainwindow.cpp
+		../mainwindow.cpp qrc_main.cpp \
+		moc_mainwindow.cpp
 OBJECTS       = cocoainitializer.o \
 		main.o \
 		mainwindow.o \
+		qrc_main.o \
 		moc_mainwindow.o
 DIST          = /usr/local/Qt-5.3.2/mkspecs/features/spec_pre.prf \
 		/usr/local/Qt-5.3.2/mkspecs/qdevice.pri \
@@ -325,6 +327,7 @@ Makefile: ../ShortcutTester.pro /usr/local/Qt-5.3.2/mkspecs/macx-g++42/qmake.con
 		/usr/local/Qt-5.3.2/mkspecs/features/yacc.prf \
 		/usr/local/Qt-5.3.2/mkspecs/features/lex.prf \
 		../ShortcutTester.pro \
+		../main.qrc \
 		/usr/local/Qt-5.3.2/lib/QtMacExtras.framework/QtMacExtras.prl \
 		/usr/local/Qt-5.3.2/lib/QtGui.framework/QtGui.prl \
 		/usr/local/Qt-5.3.2/lib/QtCore.framework/QtCore.prl \
@@ -445,6 +448,7 @@ Makefile: ../ShortcutTester.pro /usr/local/Qt-5.3.2/mkspecs/macx-g++42/qmake.con
 /usr/local/Qt-5.3.2/mkspecs/features/yacc.prf:
 /usr/local/Qt-5.3.2/mkspecs/features/lex.prf:
 ../ShortcutTester.pro:
+../main.qrc:
 /usr/local/Qt-5.3.2/lib/QtMacExtras.framework/QtMacExtras.prl:
 /usr/local/Qt-5.3.2/lib/QtGui.framework/QtGui.prl:
 /usr/local/Qt-5.3.2/lib/QtCore.framework/QtCore.prl:
@@ -468,7 +472,7 @@ ShortcutTester.app/Contents/Info.plist:
 	@sed -e "s,@SHORT_VERSION@,1.0,g" -e "s,@TYPEINFO@,????,g" -e "s,@ICON@,,g" -e "s,@BUNDLEIDENTIFIER@,com.yourcompany.ShortcutTester,g" -e "s,@EXECUTABLE@,ShortcutTester,g" -e "s,@TYPEINFO@,????,g" /usr/local/Qt-5.3.2/mkspecs/macx-g++42/Info.plist.app >ShortcutTester.app/Contents/Info.plist
 dist: 
 	@test -d .tmp/ShortcutTester1.0.0 || mkdir -p .tmp/ShortcutTester1.0.0
-	$(COPY_FILE) --parents $(DIST) .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../cocoainitializer.mm .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../mainwindow.h .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../main.cpp ../mainwindow.cpp .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../cocoainitializer.mm .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../mainwindow.ui .tmp/ShortcutTester1.0.0/ && (cd `dirname .tmp/ShortcutTester1.0.0` && $(TAR) ShortcutTester1.0.0.tar ShortcutTester1.0.0 && $(COMPRESS) ShortcutTester1.0.0.tar) && $(MOVE) `dirname .tmp/ShortcutTester1.0.0`/ShortcutTester1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/ShortcutTester1.0.0
+	$(COPY_FILE) --parents $(DIST) .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../cocoainitializer.mm .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../main.qrc .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../mainwindow.h .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../main.cpp ../mainwindow.cpp .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../cocoainitializer.mm .tmp/ShortcutTester1.0.0/ && $(COPY_FILE) --parents ../mainwindow.ui .tmp/ShortcutTester1.0.0/ && (cd `dirname .tmp/ShortcutTester1.0.0` && $(TAR) ShortcutTester1.0.0.tar ShortcutTester1.0.0 && $(COMPRESS) ShortcutTester1.0.0.tar) && $(MOVE) `dirname .tmp/ShortcutTester1.0.0`/ShortcutTester1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/ShortcutTester1.0.0
 
 
 clean:compiler_clean 
@@ -496,8 +500,13 @@ cocoainitializer.o: ../cocoainitializer.h \
 		../cocoainitializer.mm
 	/Developer/usr/bin/gcc-4.2 -c $(QMAKE_COMP_QMAKE_OBJECTIVE_CFLAGS) $(DEFINES) $(INCPATH) ../cocoainitializer.mm -o cocoainitializer.o
 
-compiler_rcc_make_all:
+compiler_rcc_make_all: qrc_main.cpp
 compiler_rcc_clean:
+	-$(DEL_FILE) qrc_main.cpp
+qrc_main.cpp: ../main.qrc \
+		../menu.json
+	/usr/local/Qt-5.3.2/bin/rcc -name main ../main.qrc -o qrc_main.cpp
+
 compiler_moc_header_make_all: moc_mainwindow.cpp
 compiler_moc_header_clean:
 	-$(DEL_FILE) moc_mainwindow.cpp
@@ -505,6 +514,8 @@ moc_mainwindow.cpp: /usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Heade
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmainwindow.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QMessageBox \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmessagebox.h \
+		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QAction \
+		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qaction.h \
 		/usr/local/include/qt5menugen.h \
 		/usr/local/include/qt5menugen_global.h \
 		/usr/local/Qt-5.3.2/lib/QtCore.framework/Versions/5/Headers/QMetaMethod \
@@ -528,8 +539,6 @@ moc_mainwindow.cpp: /usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Heade
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmenubar.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QMenu \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmenu.h \
-		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QAction \
-		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qaction.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QActionGroup \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qactiongroup.h \
 		/usr/local/Qt-5.3.2/lib/QtCore.framework/Versions/5/Headers/QMap \
@@ -560,7 +569,7 @@ compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: compiler_objective_c_clean compiler_moc_header_clean compiler_uic_clean 
+compiler_clean: compiler_objective_c_clean compiler_rcc_clean compiler_moc_header_clean compiler_uic_clean 
 
 ####### Compile
 
@@ -569,6 +578,8 @@ main.o: ../main.cpp ../mainwindow.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmainwindow.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QMessageBox \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmessagebox.h \
+		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QAction \
+		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qaction.h \
 		/usr/local/include/qt5menugen.h \
 		/usr/local/include/qt5menugen_global.h \
 		/usr/local/Qt-5.3.2/lib/QtCore.framework/Versions/5/Headers/QMetaMethod \
@@ -592,8 +603,6 @@ main.o: ../main.cpp ../mainwindow.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmenubar.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QMenu \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmenu.h \
-		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QAction \
-		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qaction.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QActionGroup \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qactiongroup.h \
 		/usr/local/Qt-5.3.2/lib/QtCore.framework/Versions/5/Headers/QMap \
@@ -615,6 +624,8 @@ mainwindow.o: ../mainwindow.cpp ../mainwindow.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmainwindow.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QMessageBox \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmessagebox.h \
+		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QAction \
+		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qaction.h \
 		/usr/local/include/qt5menugen.h \
 		/usr/local/include/qt5menugen_global.h \
 		/usr/local/Qt-5.3.2/lib/QtCore.framework/Versions/5/Headers/QMetaMethod \
@@ -638,8 +649,6 @@ mainwindow.o: ../mainwindow.cpp ../mainwindow.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmenubar.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QMenu \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qmenu.h \
-		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QAction \
-		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qaction.h \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/QActionGroup \
 		/usr/local/Qt-5.3.2/lib/QtWidgets.framework/Versions/5/Headers/qactiongroup.h \
 		/usr/local/Qt-5.3.2/lib/QtCore.framework/Versions/5/Headers/QMap \
@@ -655,6 +664,9 @@ mainwindow.o: ../mainwindow.cpp ../mainwindow.h \
 		/usr/local/Qt-5.3.2/lib/QtCore.framework/Versions/5/Headers/QDebug \
 		/usr/local/Qt-5.3.2/lib/QtCore.framework/Versions/5/Headers/qdebug.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../mainwindow.cpp
+
+qrc_main.o: qrc_main.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_main.o qrc_main.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp

@@ -1,0 +1,13 @@
+[
+    {
+        "name": "&File",
+        "actions": [
+            {
+                "name": "test",
+                "text": "&Test",
+                "toolbar_hidden": false,
+                "slot": "itworks()"
+            }
+        ]
+    }
+]

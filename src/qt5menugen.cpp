@@ -31,6 +31,7 @@ void QtMenuGen::setupToolBarOn(QFile* definition, QWidget *widget, QObject *slot
     if (_loaded == false)
         loadFile(QUrl(definition->fileName()));
 
+	load_shortcuts();
     mb = setupMenus(widget);
 #ifdef Q_OS_MAC
     tb = setupOSXToolBar(widget, slotobj);
@@ -48,6 +49,7 @@ void QtMenuGen::setupToolBarOn(QFile *definition, QMainWindow *window, QObject *
     if (_loaded == false)
         loadFile(QUrl(definition->fileName()));
 
+   load_shortcuts();
    mb = setupMenus(window);
    window->setMenuBar(mb);
 #ifdef Q_OS_MAC

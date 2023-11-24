@@ -19,6 +19,7 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
@@ -29,13 +30,16 @@ class Ui_MainWindow
 public:
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout_2;
-    QVBoxLayout *verticalLayout;
+    QTabWidget *tabWidget;
+    QWidget *tab_3;
+    QVBoxLayout *verticalLayout_3;
     QWidget *widget;
     QFormLayout *formLayout_2;
     QFormLayout *formLayout;
     QLabel *label;
     QLineEdit *txtshortcut;
     QPushButton *btncheck;
+    QWidget *tab_4;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -49,15 +53,21 @@ public:
         verticalLayout_2->setSpacing(6);
         verticalLayout_2->setContentsMargins(11, 11, 11, 11);
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
-        verticalLayout = new QVBoxLayout();
-        verticalLayout->setSpacing(6);
-        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        widget = new QWidget(centralWidget);
+        tabWidget = new QTabWidget(centralWidget);
+        tabWidget->setObjectName(QStringLiteral("tabWidget"));
+        tab_3 = new QWidget();
+        tab_3->setObjectName(QStringLiteral("tab_3"));
+        verticalLayout_3 = new QVBoxLayout(tab_3);
+        verticalLayout_3->setSpacing(6);
+        verticalLayout_3->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        widget = new QWidget(tab_3);
         widget->setObjectName(QStringLiteral("widget"));
         formLayout_2 = new QFormLayout(widget);
         formLayout_2->setSpacing(6);
         formLayout_2->setContentsMargins(11, 11, 11, 11);
         formLayout_2->setObjectName(QStringLiteral("formLayout_2"));
+        formLayout_2->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
         formLayout = new QFormLayout();
         formLayout->setSpacing(6);
         formLayout->setObjectName(QStringLiteral("formLayout"));
@@ -86,14 +96,21 @@ public:
         formLayout_2->setWidget(2, QFormLayout::FieldRole, btncheck);
 
 
-        verticalLayout->addWidget(widget);
+        verticalLayout_3->addWidget(widget);
 
+        tabWidget->addTab(tab_3, QString());
+        tab_4 = new QWidget();
+        tab_4->setObjectName(QStringLiteral("tab_4"));
+        tabWidget->addTab(tab_4, QString());
 
-        verticalLayout_2->addLayout(verticalLayout);
+        verticalLayout_2->addWidget(tabWidget);
 
         MainWindow->setCentralWidget(centralWidget);
 
         retranslateUi(MainWindow);
+
+        tabWidget->setCurrentIndex(0);
+
 
         QMetaObject::connectSlotsByName(MainWindow);
     } // setupUi
@@ -102,8 +119,11 @@ public:
     {
         MainWindow->setWindowTitle(QString());
         label->setText(QApplication::translate("MainWindow", "Shortcut String", 0));
+        txtshortcut->setText(QApplication::translate("MainWindow", "Qt::Key_Control+Qt::Key_E", 0));
         txtshortcut->setPlaceholderText(QApplication::translate("MainWindow", "Qt::Key_Control+Qt::Key_Q", 0));
         btncheck->setText(QApplication::translate("MainWindow", "Check", 0));
+        tabWidget->setTabText(tabWidget->indexOf(tab_3), QApplication::translate("MainWindow", "Tab 1", 0));
+        tabWidget->setTabText(tabWidget->indexOf(tab_4), QApplication::translate("MainWindow", "Tab 2", 0));
     } // retranslateUi
 
 };

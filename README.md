@@ -64,6 +64,7 @@
 
 Instead of having many QMenu and QAction declarations in your qt5 c++ header files, this allows initialization and retrieval of QActions in one statement. Library comes with an example project to see how it is used.
 
+
 ### Quickstart
 
 Using this library requires that you:
@@ -96,7 +97,23 @@ A super easy example is a QAction that closes the application.
 ]
 ```
 
+Given the v1.1.0 update, it is recommended to use the "QKeySequence::Quit" shortcut instead of "Ctrl+Q".
+
 Essentially ``"slot": "close()"`` calls the mainwindow's close() slot (it already exists) and so this handles icon/shortcut/QAction/QMenu and if desired, a QToolBar item (QAction or QMacToolBarItem).
+
+### Shortcuts
+
+This library handles shortcuts. Traditionally, you use "Ctrl+Q", the typical QAction way to define shortcuts. It's convenient, but limited.
+
+Due to some Qt and C++ limitations, we include the Qt::Key and QKeySequence enums as a QMap so they can be used as shortcut parameters. This opens up a lot more functionality:
+
+* Up to 4 keys can be recognized as a single shortcut
+* The QKeySequence **StandardKey** enum contains a lot of very convenient shortcuts that are multi-platform compatible so it's recommended you use these first and fill in any missing shortcuts using QAction or Qt::Key enum shortcuts.
+* * "QKeySequence::_______" for example
+* An example program (ShortcutTester) is a simple window that you input the string that would go into the json file **shortcut** key's value and it will determine if it's recognized given the input string. (TODO: Add cmake build file, currently just qmake and requires an installed qt5menugen library.)
+
+<b>These enums haven't changed between Qt5.3.2 and Qt5.15. Since Qt6 is being developed, we can restrict compatibility to just the Qt5.x series.</b>
+
 
 ### Oxygen Icon Licensing
 

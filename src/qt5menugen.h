@@ -62,9 +62,9 @@ class QT5MENUGENSHARED_EXPORT QtMenuGen
 public:
     /*!
      * \brief QtMenuGen Object based on a QFile path
-     * \param path QFile local file
+     * \param path QString local file
      */
-    QtMenuGen(QFile path);
+    explicit QtMenuGen(QString path);
     /*!
      * \brief QtMenuGen Object based on a QUrl path
      *
@@ -77,10 +77,10 @@ public:
 
     /*!
      * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required
-     * \param path QFile local file
+     * \param path QString local file
      * \return bool whether file was loaded successfully
      */
-    bool loadFile(QFile &path);
+    bool loadFile(QString path);
     /*!
      * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required
      * \param path QUrl local file
@@ -145,10 +145,14 @@ public:
      */
     QMenu* menuByName(const QString name);
 
+    bool isLoaded();
+
+    const QMap<QString, int> getShortcuts();
 
 
 private:
     bool loaded;
+    bool configured;
     QMap<QString, int> shortcuts;
     QJsonDocument jdoc;
     QMap<QString, QAction*> action_map;

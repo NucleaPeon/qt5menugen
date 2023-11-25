@@ -1,12 +1,13 @@
 #include "qt5menugen.h"
 
-QtMenuGen::QtMenuGen(QFile path)
+QtMenuGen::QtMenuGen(QString path)
 {
     this->action_map = QMap<QString, QAction*>();
     this->group_map = QMap<QString, QActionGroup*>();
     this->menu_map = QMap<QString, QMenu*>();
     this->shortcuts = QMap<QString, int>();
     this->loaded = false;
+    this->configured = false;
     this->loadFile(path);
 }
 
@@ -17,6 +18,7 @@ QtMenuGen::QtMenuGen(QUrl path)
     this->menu_map = QMap<QString, QMenu*>();
     this->shortcuts = QMap<QString, int>();
     this->loaded = false;
+    this->configured = false;
     this->loadFile(path);
 }
 
@@ -25,17 +27,18 @@ QtMenuGen::~QtMenuGen()
 
 }
 
-bool QtMenuGen::loadFile(QFile &path)
+bool QtMenuGen::loadFile(QString path)
 {
-    if (path.exists()) {
-        if (path.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QFile def(path);
+    if (def.exists()) {
+        if (def.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QJsonParseError err;
-            this->jdoc = QJsonDocument::fromJson(path.readAll(), &err);
+            this->jdoc = QJsonDocument::fromJson(def.readAll(), &err);
             if(err.error != QJsonParseError::NoError) {
                 QString msg = QString("Unable to parse json file (%1)").arg(err.errorString());
                 qWarning(msg.toLatin1());
             }
-            path.close();
+            def.close();
         }
         load_shortcuts();
         this->loaded = true;
@@ -48,8 +51,7 @@ bool QtMenuGen::loadFile(QFile &path)
 bool QtMenuGen::loadFile(QUrl path)
 {
     if (path.isLocalFile()) {
-        QFile file(path.toLocalFile());
-        return this->loadFile(file);
+        return this->loadFile(path.toLocalFile());
     } else {
         qWarning("Remote QUrl loadFile() Not implemented");
         return false;
@@ -666,6 +668,16 @@ QMenu *QtMenuGen::menuByName(const QString name)
     return menu_map.value(name.toLower().replace("&", ""), NULL);
 }
 
+bool QtMenuGen::isLoaded()
+{
+    return this->loaded;
+}
+
+const QMap<QString, int> QtMenuGen::getShortcuts()
+{
+    return this->shortcuts;
+}
+
 QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
 {
     QMenuBar *mb = new QMenuBar(widget);
@@ -713,7 +725,7 @@ QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
 					switch(lst.size()) {
 					case 1:
                         if (shortcuts.contains(lst.at(0)))
-                            seq = QKeySequence((QKeySequence) shortcuts.value(lst.at(0)));
+                            seq = QKeySequence((QKeySequence::StandardKey) shortcuts.value(lst.at(0)));
 
 						break;
 					case 2:

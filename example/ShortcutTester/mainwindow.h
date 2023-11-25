@@ -4,7 +4,12 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QAction>
-#include "qt5menugen.h"
+#include <QMap>
+#include <QFile>
+#include <QShortcut>
+
+#include <qt5menugen.h>
+
 
 
 namespace Ui {
@@ -25,6 +30,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QtMenuGen *menugen;
+    QMap<QString, int> shortcuts;
 };
 
 #endif // MAINWINDOW_H

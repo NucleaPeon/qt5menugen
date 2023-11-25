@@ -1,28 +1,16 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
-#include <QMap>
-#include <QFile>
-#include <QShortcut>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QFile def(":/menu.json");
-    QtMenuGen::setupToolBarOn(&def, this, this);
-    connect(ui->btncheck, SIGNAL(clicked()), this, SLOT(checkShortcut()));
-    QAction* act = QtMenuGen::actionByName("test");
-    QMap<QString, int> shortcuts = QtMenuGen::load_shortcuts();
-    qDebug() << QKeySequence::Underline;
-    qDebug() << Qt::Key_U;
-    qDebug() << shortcuts.value("Qt::Key_Control");
-    // LEFT OFF
-    // TODO: Currently only StandardKey enum conversions work as expected, so ignore Qt::Key for now.
-    // Convert QtMenuGen into class structure, not static, release as v2.0.0.
-    // Only convert Qt::Key values if we have examples that show it actually working.
-    act->setShortcut(QKeySequence((QKeySequence::StandardKey) 29));
+    this->menugen = new QtMenuGen(":/menu.json");
+    this->menugen->setup(this, this);
+    this->shortcuts = this->menugen->getShortcuts();
+   connect(ui->btncheck, SIGNAL(clicked()), this, SLOT(checkShortcut()));
 }
 
 MainWindow::~MainWindow()
@@ -33,7 +21,6 @@ MainWindow::~MainWindow()
 void MainWindow::checkShortcut()
 {
     const QString shortcut = ui->txtshortcut->text();
-    QMap<QString, int> shortcuts = QtMenuGen::load_shortcuts();
     QStringList lst = shortcut.split("+");
     if (lst.size() > 4) {
         QMessageBox msgBox;
@@ -44,7 +31,6 @@ void MainWindow::checkShortcut()
     }
     bool valid = true;
     foreach(const QString s, lst) {
-        qDebug() << shortcuts.size();
         if (shortcuts.value(s, 0) == 0) {
             QMessageBox msgBox;
             QString msg = QString("The shortcut %1 is not recognized by qt5menugen").arg(s);
@@ -54,41 +40,49 @@ void MainWindow::checkShortcut()
         }
     }
     if (valid) {
-        QAction* act = QtMenuGen::actionByName("test");
-        qDebug() << act;
+        QAction* act = this->menugen->actionByName("test");
         QKeySequence seq;
-        qDebug() << lst;
         switch(lst.size()) {
             case 1:
-                qDebug() << lst.at(0) << shortcuts.value(lst.at(0), 0);
-                seq = QKeySequence(shortcuts.value(lst.at(0), 0));
+                if (shortcuts.contains(lst.at(0)))
+                    qDebug() << "setting seq" << shortcuts.value(lst.at(0));
+                    seq = QKeySequence((QKeySequence::StandardKey) shortcuts.value(lst.at(0)));
                 break;
             case 2:
-                qDebug() << lst.at(0) << shortcuts.value(lst.at(0), 0);
-                qDebug() << lst.at(1) << shortcuts.value(lst.at(1), 0);
-                seq = QKeySequence(shortcuts.value(lst.at(0), 0),
-                                   shortcuts.value(lst.at(1), 0));
+                if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1)))
+                    seq = QKeySequence((int) shortcuts.value(lst.at(0)),
+                                       (int) shortcuts.value(lst.at(1)));
                 break;
             case 3:
-                seq = QKeySequence(shortcuts.value(lst.at(0), 0),
-                                   shortcuts.value(lst.at(1), 0),
-                                   shortcuts.value(lst.at(2), 0));
+                if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
+                        && shortcuts.contains(lst.at(2)))
+                    seq = QKeySequence((int) shortcuts.value(lst.at(0)),
+                                       (int) shortcuts.value(lst.at(1)),
+                                       (int) shortcuts.value(lst.at(2)));
                 break;
             case 4:
-                seq = QKeySequence(shortcuts.value(lst.at(0), 0),
-                                   shortcuts.value(lst.at(1), 0),
-                                   shortcuts.value(lst.at(2), 0),
-                                   shortcuts.value(lst.at(3), 0));
+                if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
+                        && shortcuts.contains(lst.at(2)) && shortcuts.contains(lst.at(3)))
+                    seq = QKeySequence((int) shortcuts.value(lst.at(0)),
+                                       (int) shortcuts.value(lst.at(1)),
+                                       (int) shortcuts.value(lst.at(2)),
+                                       (int) shortcuts.value(lst.at(3)));
                 break;
 
         }
-        act->setShortcut(seq);
-        qDebug() << seq;
-        QMessageBox msgBox;
-        QString msg = QString("%1 is a valid shortcut! It is now assigned to the QAction, try it out!").arg(shortcut);
-        msgBox.setText(msg);
-        msgBox.exec();
-        qDebug() << act->shortcut();
+        qDebug() << act << seq;
+        if(act != NULL) {
+            qDebug() << "Setting shortcut to " << seq;
+            act->setShortcut(seq);
+            QMessageBox msgBox;
+            QString msg = QString("%1 is a valid shortcut! It is now assigned to the QAction, try it out!").arg(shortcut);
+            msgBox.setText(msg);
+            msgBox.exec();
+        } else {
+            QMessageBox msgBox;
+            msgBox.setText("QAction not found / is null");
+            msgBox.exec();
+        }
     }
 
 }

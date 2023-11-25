@@ -15,10 +15,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btncheck, SIGNAL(clicked()), this, SLOT(checkShortcut()));
     QAction* act = QtMenuGen::actionByName("test");
     QMap<QString, int> shortcuts = QtMenuGen::load_shortcuts();
-    QKeySequence seq(shortcuts.value("QKeySequence::Underline"));
-    QShortcut *sc = new QShortcut(seq, this);
-    connect(sc, SIGNAL(activated()), this, SLOT(itworks()));
-    qDebug() << act->shortcuts();
+    qDebug() << QKeySequence::Underline;
+    qDebug() << Qt::Key_U;
+    qDebug() << shortcuts.value("Qt::Key_Control");
+    // LEFT OFF
+    // TODO: Currently only StandardKey enum conversions work as expected, so ignore Qt::Key for now.
+    // Convert QtMenuGen into class structure, not static, release as v2.0.0.
+    // Only convert Qt::Key values if we have examples that show it actually working.
+    act->setShortcut(QKeySequence((QKeySequence::StandardKey) 29));
 }
 
 MainWindow::~MainWindow()

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.3)
 project(qt5menugen
-        VERSION 1.1.0
+        VERSION 2.0.0
         DESCRIPTION "Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file"
         LANGUAGES CXX)
 
@@ -37,7 +37,7 @@ elseif(MSVC)
 endif()
 
 set_target_properties(qt5menugen PROPERTIES VERSION ${PROJECT_VERSION}
-	SOVERSION 1
+	SOVERSION 2
 )
 set_target_properties(qt5menugen PROPERTIES PUBLIC_HEADER "${QT5MENUGEN_HEADERS}")
 configure_file(src/qt5menugen.pc.in src/qt5menugen.pc @ONLY)

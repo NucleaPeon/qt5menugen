@@ -31,92 +31,145 @@
 #endif
 
 /*!
- * \brief The LoadMenu class is a file spec loader for menu setup.
+ * \brief The QtMenuGen class contains functionality to autoconfigure your toolbars and menus.
  *
- * Unlike sbs and sbp files, this is internal only and handles consistency and
- * convenience by using a .json file that defines how a menu is configured so
- * it can be reproduced on all operating systems in similar fashion.
- * OS X = QMacToolBar
- * Linux and Windows = QToolBar
- * Windows 7+ jump lists and toolbar thumbnail buttons: QWinThumbnailToolBar
+ * A Json file defines how a menu is configured so it can be reproduced on all operating systems in similar fashion:
  *
+ *   OS X = QMacToolBar
+ *   Linux and Windows = QToolBar
+ *   All: QMenu and QAction
  *
- * Once a defined spec file is read in, it is cached so menus can be generated repeatedly
- * without having to re-read the file.
+ * Shortcuts:
+ *
+ * To allow certain shortcuts to be accessed, we enable the string "QKeySequence::_______" to be used
+ * in json to allow the appropriate \sa QKeySequence::StandardKey as the shortcut.
+ * Instead of "Ctrl+P", "QKeySequence::Print" can be used and is recommended as it's more platform-
+ * independent and readable.
+ *
+ * I'm looking at getting Qt::Key enum to be utilized within this library but so far I've been
+ * unsuccessful. Even with the appropriate hex values being given to QKeySequence, it doesn't work
+ * for shortcuts; perhaps it's unsuitable for this purpose and will be ignored.
+ *
+ * Since the Qt::Key and QKeySequence::StandardKey enums are in namespaces and not QObject's, there is
+ * no way to access them by a string repr of the enum key (at least respecting the < c++-11 standard.)
+ * As there haven't been any differences between 5.3.2 and 5.15 between enums, I've copied the enums
+ * and their values as a QMap<QString, int>.
  */
 
 class QT5MENUGENSHARED_EXPORT QtMenuGen
 {
 
 public:
-    QtMenuGen();
-
-    static bool loadFile(QUrl def);
-    static void setupToolBarOn(QFile *definition, QWidget *widget, QObject *slotobj = 0);
-    static void setupToolBarOn(QFile *definition, QMainWindow *window, QObject *slotobj = 0);
+    /*!
+     * \brief QtMenuGen Object based on a QFile path
+     * \param path QFile local file
+     */
+    QtMenuGen(QFile path);
+    /*!
+     * \brief QtMenuGen Object based on a QUrl path
+     *
+     * Currently only local files are implemented
+     *
+     * \param path QUrl local file
+     */
+    QtMenuGen(QUrl path);
+    ~QtMenuGen();
 
     /*!
-     * \brief actionByName Retrieves a QAction based on name defined in the menu_defs.json
+     * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required
+     * \param path QFile local file
+     * \return bool whether file was loaded successfully
+     */
+    bool loadFile(QFile &path);
+    /*!
+     * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required
+     * \param path QUrl local file
+     * \return bool whether file was loaded successfully
+     */
+    bool loadFile(QUrl path);
+
+    /*!
+     * \brief setup configures the Toolbar and Menus on the QWidget and looks for slot functions in the slotobj.
+     *
+     * This is used when displaying QWidgets, non-QMainWindow user interfaces.
+     *
+     * \code{.cpp}
+     * #include <qtmenugen.h>
+     *
+     * // ...
+     * {
+     *      QFile path(":/files/menu.json");
+     *      this->qtmg = QtMenuGen(&path);
+     *      this->qtmg.setup(this, this);
+     * }
+     *
+     * \endcode
+     *
+     * \param widget QWidget*
+     * \param slotobj QObject*
+     */
+    void setup(QWidget *widget, QObject *slotobj);
+
+    /*!
+     * \brief setup configures the Toolbar and Menus on the QMainWindow and looks for slot functions in the slotobj.
+     *
+     * \code{.cpp}
+     * #include <qtmenugen.h>
+     *
+     * // ...
+     * {
+     *      QFile path(":/files/menu.json");
+     *      this->qtmg = QtMenuGen(&path);
+     *      this->qtmg.setup(this, this);
+     * }
+     *
+     * \endcode
+     *
+     * \param widget QWidget*
+     * \param slotobj QObject*
+     */
+    void setup(QMainWindow *window, QObject *slotobj);
+
+    /*!
+     * \brief actionByName Return the QAction* object based on the name assigned to it in the json file
+     *
      * \param name QString
-     * \return QAction* or NULL if not found
+     * \return QAction*
      */
-    static QAction* actionByName(const QString name);
-    static QMenu* menuByName(const QString name);
-
-    static QMenuBar *setupMenus(QWidget *widget);
+    QAction* actionByName(const QString name);
     /*!
-     * \brief To allow certain shortcuts to be accessed, load in Qt::Key  and QKeySequence enums into a QMap.
+     * \brief menuByName Return the QMenu* object based on the name assigned to it in the json file
      *
-     * This should only be called once, but will not be harmful to call multiple times.
-     * Gets called on setupToolBarOn(), but for testing shortcuts we call directly.
-     *
-     * Due to the age of c++ standard (pre-11) that this library is compatible with,
-     * as well as the enum being defined in a namespace and not a QObject,
-     * there is no convenient way to look up a key from an enum as a string.
-     * Looking at the evolution of Qt::Key from 5.3.2 to 5.15, there is no
-     * difference aside from some spacing and comments, so we've directly copied the
-     * entire enum as a string to int map so we can provide the exact values given
-     * the standard enum string name.
-     * We also incorporate QKeySequence shortcuts into this map for convenience.
-     * Any shortcut that has "::" in it will evaluate to an int value, otherwise
-     * using "Ctrl+Z" for example, stays a string -- these are not compatible!
-     * You cannot use something like "Ctrl+Qt::Key_A".
-     * For as much as you can, use the QKeySequence::StandardKey enum for basic
-     * shortcuts (ie: "QKeySequence::Copy") until you have need of something more custom.
+     * \param name QString
+     * \return QMenu*
      */
-    static QMap<QString, int> load_shortcuts();
-#ifdef Q_OS_WIN
-    static QWinThumbnailToolBar* setupWindowsToolBar(QWidget *widget, QObject *slotobj);
-#endif
-#ifdef Q_OS_LINUX
-    static QToolBar* setupNixToolBar(QWidget *widget, QObject *slotobj);
-#endif
-#ifdef Q_OS_MAC
-    static QMacToolBar* setupOSXToolBar(QWidget *widget, QObject *slotobj);
-    static QMacToolBarItem* toolBarItemByText(QString text);
-#else
-    static QAction* toolBarItemByText(QString text);
-#endif
+    QMenu* menuByName(const QString name);
+
+
 
 private:
-    static void handleSignalSlot(QObject *connector, const char *signal, QObject *caller, const char *slot);
-    static bool isValid(const QJsonObject obj);
+    bool loaded;
+    QMap<QString, int> shortcuts;
+    QJsonDocument jdoc;
+    QMap<QString, QAction*> action_map;
+    QMap<QString, QActionGroup*> group_map;
+    QMap<QString, QMenu*> menu_map;
+    QMenuBar* mb;
 
-};
+    QMenuBar* setupMenus(QWidget *widget);
+    QMap<QString, int> load_shortcuts();
+    void handleSignalSlot(QObject *connector, const char *signal, QObject *caller, const char *slot);
+    bool isValid(const QJsonObject obj);
 
-static bool _loaded;
-static QJsonDocument _json;
-static QMap<QString, QAction*> _action_map;
-static QMap<QString, QActionGroup*> _group_map;
-static QMap<QString, QMenu*> _menu_map;
-static QMap<QString, int> _shortcut_map;
-static QMenuBar* mb;
 #ifdef Q_OS_MAC
-static QMacToolBar *tb;
+    QMacToolBar *tb;
+    QMacToolBar* setupOSXToolBar(QWidget *widget, QObject *slotobj);
+    QMacToolBarItem* toolBarItemByText(QString text);
 #else
-static QToolBar *tb;
+    QToolBar *tb;
+    QAction* toolBarItemByText(QString text);
+    QToolBar* setupToolBar(QWidget *widget, QObject *slotobj);
 #endif
-
-
+};
 
 #endif // QTMENUGEN_H

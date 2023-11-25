@@ -6,6 +6,7 @@
                 "name": "test",
                 "text": "&Test",
                 "toolbar_hidden": false,
+                "shortcut": "Qt::Key_Control+Qt::Key_E",
                 "slot": "itworks()"
             }
         ]

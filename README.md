@@ -69,12 +69,24 @@ Instead of having many QMenu and QAction declarations in your qt5 c++ header fil
 
 Using this library requires that you:
 
-* Have a .json file included in your project and abides by the specification (todo, see existing ``example/`` json file and later, the appropriate documentation).
-* Include icons if applicable
+* Have a .json file included in your project and abides by the specification (todo, see existing json files in ``example/`` folder and later, the appropriate documentation).
 * Make the single call to set up the QMenu and Q{Mac}ToolBar with the QFile parameter
 
-Slots are handled by writing out the method as a string in the json file, then expecting that method to be on the object that contains the toolbar/menus.
-Currently we support this on ``QWidget``'s and ``QMainWindow``'s.
+How To Initialize:
+
+```
+	#include <qt5menugen.h>
+
+	class QWidget/QMainWindow ...
+	...
+
+	{
+		QtMenuGen menugen = new QtMenuGen(":/menu.json");
+    	menugen->setup(this, this);
+    }
+```
+
+*QtMenuGen can take a QUrl or a QString path, the ":" denotes a Qt Resource file path.*
 
 A super easy example is a QAction that closes the application.
 
@@ -85,8 +97,8 @@ A super easy example is a QAction that closes the application.
         "actions": [
         		{
             	"name": "quit",
-           	"text": "&Quit",
-          	"toolbar_hidden": true,
+           		"text": "&Quit",
+          		"toolbar_hidden": true,
                 "shortcut": "Ctrl+Q",
                 "icon": ":/icons/dialog-close.png",
                 "slot": "close()",
@@ -97,22 +109,26 @@ A super easy example is a QAction that closes the application.
 ]
 ```
 
-Given the v1.1.0 update, it is recommended to use the "QKeySequence::Quit" shortcut instead of "Ctrl+Q".
+### Additional Details
+
+
+**SLOTS**
+
+Slots are handled by writing out the method name including parens as a string in the json file, then expecting that method to be on the object that contains the toolbar/menus.
+
+Toolbars and Menus are supported on ``QWidget``'s and ``QMainWindow``'s.
 
 Essentially ``"slot": "close()"`` calls the mainwindow's close() slot (it already exists) and so this handles icon/shortcut/QAction/QMenu and if desired, a QToolBar item (QAction or QMacToolBarItem).
 
-### Shortcuts
+**SHORTCUTS**
 
-This library handles shortcuts. Traditionally, you use "Ctrl+Q", the typical QAction way to define shortcuts. It's convenient, but limited.
+Shortcuts can either be a string of Key names and ``+`` to append them.
+Example: ``Ctrl+P`` for a print shortcut, but recommended to use "QKeySequence::Print" instead because it better covers multi-platform support.
 
-Due to some Qt and C++ limitations, we include the Qt::Key and QKeySequence enums as a QMap so they can be used as shortcut parameters. This opens up a lot more functionality:
+QtMenuGen supports utilizing ``StandardKey`` enum shortcuts. for better multiplatform handling and is recommended to use these first. See the QKeySequence Qt documentation for a list, or check qt5menugen.cpp for the
+QMap we use to handle enum key loookup.
 
-* Up to 4 keys can be recognized as a single shortcut
-* The QKeySequence **StandardKey** enum contains a lot of very convenient shortcuts that are multi-platform compatible so it's recommended you use these first and fill in any missing shortcuts using QAction or Qt::Key enum shortcuts.
-* * "QKeySequence::_______" for example
-* An example program (ShortcutTester) is a simple window that you input the string that would go into the json file **shortcut** key's value and it will determine if it's recognized given the input string. (TODO: Add cmake build file, currently just qmake and requires an installed qt5menugen library.)
-
-<b>These enums haven't changed between Qt5.3.2 and Qt5.15. Since Qt6 is being developed, we can restrict compatibility to just the Qt5.x series.</b>
+<b>The ``StandardKey`` enum hasn't changed between Qt5.3.2 and Qt5.15. Since Qt6 is being developed, we can restrict compatibility to just the Qt5.x series.</b>
 
 
 ### Oxygen Icon Licensing

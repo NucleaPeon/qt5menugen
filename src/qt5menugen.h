@@ -42,18 +42,20 @@
  * Shortcuts:
  *
  * To allow certain shortcuts to be accessed, we enable the string "QKeySequence::_______" to be used
- * in json to allow the appropriate \sa QKeySequence::StandardKey as the shortcut.
+ * in json to allow the appropriate \c QKeySequence::StandardKey as the shortcut.
  * Instead of "Ctrl+P", "QKeySequence::Print" can be used and is recommended as it's more platform-
  * independent and readable.
  *
- * I'm looking at getting Qt::Key enum to be utilized within this library but so far I've been
- * unsuccessful. Even with the appropriate hex values being given to QKeySequence, it doesn't work
+ * I'm looking at getting \c Qt::Key enum to be utilized within this library but so far I've been
+ * unsuccessful. Even with the appropriate hex values being given to \c QKeySequence, it doesn't work
  * for shortcuts; perhaps it's unsuitable for this purpose and will be ignored.
  *
- * Since the Qt::Key and QKeySequence::StandardKey enums are in namespaces and not QObject's, there is
+ * Since the \c Qt::Key and \c QKeySequence::StandardKey enums are in namespaces and not \c QObject's, there is
  * no way to access them by a string repr of the enum key (at least respecting the < c++-11 standard.)
  * As there haven't been any differences between 5.3.2 and 5.15 between enums, I've copied the enums
- * and their values as a QMap<QString, int>.
+ * and their values as a \c QMap<QString, int>.
+ *
+ * \sa QKeySequence
  */
 
 class QT5MENUGENSHARED_EXPORT QtMenuGen
@@ -61,8 +63,9 @@ class QT5MENUGENSHARED_EXPORT QtMenuGen
 
 public:
     /*!
-     * \brief QtMenuGen Object based on a QFile path
+     * \brief QtMenuGen Object based on a QString path
      * \param path QString local file
+     * \version 2.0.0
      */
     explicit QtMenuGen(QString path);
     /*!
@@ -71,20 +74,25 @@ public:
      * Currently only local files are implemented
      *
      * \param path QUrl local file
+     *
+     * \version 2.0.0
      */
     QtMenuGen(QUrl path);
     ~QtMenuGen();
 
     /*!
-     * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required
+     * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required.
      * \param path QString local file
      * \return bool whether file was loaded successfully
+     *
+     * \version 2.0.0
      */
     bool loadFile(QString path);
     /*!
      * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required
      * \param path QUrl local file
      * \return bool whether file was loaded successfully
+     * \version 2.0.0
      */
     bool loadFile(QUrl path);
 
@@ -98,8 +106,7 @@ public:
      *
      * // ...
      * {
-     *      QFile path(":/files/menu.json");
-     *      this->qtmg = QtMenuGen(&path);
+     *      this->qtmg = QtMenuGen(":/files/menu.json");
      *      this->qtmg.setup(this, this);
      * }
      *
@@ -107,6 +114,7 @@ public:
      *
      * \param widget QWidget*
      * \param slotobj QObject*
+     * \version 2.0.0
      */
     void setup(QWidget *widget, QObject *slotobj);
 
@@ -118,8 +126,7 @@ public:
      *
      * // ...
      * {
-     *      QFile path(":/files/menu.json");
-     *      this->qtmg = QtMenuGen(&path);
+     *      this->qtmg = QtMenuGen(":/files/menu.json");
      *      this->qtmg.setup(this, this);
      * }
      *
@@ -127,6 +134,7 @@ public:
      *
      * \param widget QWidget*
      * \param slotobj QObject*
+     * \version 2.0.0
      */
     void setup(QMainWindow *window, QObject *slotobj);
 
@@ -135,6 +143,7 @@ public:
      *
      * \param name QString
      * \return QAction*
+     * \version 2.0.0
      */
     QAction* actionByName(const QString name);
     /*!
@@ -142,12 +151,34 @@ public:
      *
      * \param name QString
      * \return QMenu*
+     * \version 2.0.0
      */
     QMenu* menuByName(const QString name);
 
+	/*!
+	 * \version 2.0.0
+	 */
     bool isLoaded();
 
+	/*!
+	 * \version 2.0.0
+     * \return QMap<QString, int>
+	 */
     const QMap<QString, int> getShortcuts();
+
+	/*!
+	 * \brief Returns json that is read in or an invalid/empty json object
+	 *
+	 * In certain cases such as testing, it's useful to know what has been
+	 * read in but no toolbars or menus are required. Calling this after a
+	 * successful contructor call or \c loadFile() call will allow this to
+	 * return a valid QJsonDocument object.
+	 * \sa QJsonDocument
+	 *
+	 * \version 2.0.0
+     * \return QJsonDocument
+	 */
+    const QJsonDocument jsonDocument();
 
 
 private:

@@ -1,0 +1,46 @@
+/*! \mainpage QtMenuGen: Automatic Menu and ToolBar generation tool for Qt5
+ *
+ * \section intro_sec Introduction
+ *
+ * Creating Menus, ToolBars and QActions for Undo/Redo functionality can be
+ * a verbose task in most GUI toolkits. This library aims to simplify source
+ * code while providing all functionality for multiple platforms.
+ *
+ * This code aims to be compatible with Qt 5.3.2 and up.
+ *
+ *
+ *
+ * \section install_sec Installation
+ *
+ * This will install the library to /usr/local/lib.
+ *
+ * \code{.sh}
+ * cd build/
+ * cmake ..
+ * make -j2
+ * sudo make install
+ * \endcode
+ *
+ * \section usage_sec Usage
+ *
+ * \code{.cpp}
+ *
+ * #include <qtmenugen.h>
+ * ...
+ * QtMenuGen *qmg = new QtMenuGen(":/files/menu.json");
+ * qmg->setup(this, this);
+ * \endcode
+ *
+ *
+ * \section changelog_sec Changelog
+ *
+ * \subsection v2_0_0 v2.0.0
+ *
+ * API breaks compatibility with v1.x, no more static methods or variables.
+ * Now object oriented.
+ *
+ * \subsection v1_0_0 v1.0.0
+ *
+ * Initial release, uses static functions and variables.
+ *
+ */

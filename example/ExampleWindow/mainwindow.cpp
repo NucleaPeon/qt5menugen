@@ -12,8 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setStatusBar(this->statusBar);
 
     // Code to load our menus and toolbars via json:
-    QFile pathToJson(":/json");
-    QtMenuGen::setupToolBarOn(&pathToJson, this, this);
+    this->menugen = new QtMenuGen(":/json");
+    menugen->setup(this, this);
     // --------------------------------------------
 
     this->statusBar->showMessage("Ready.");

@@ -33,6 +33,7 @@ private:
     About *aboutWindow;
     Preferences *preferencesWindow;
     QStatusBar *statusBar;
+    QtMenuGen *menugen;
 };
 
 #endif // MAINWINDOW_H

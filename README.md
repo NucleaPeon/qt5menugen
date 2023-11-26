@@ -72,7 +72,7 @@ Using this library requires that you:
 * Have a .json file included in your project and abides by the specification (todo, see existing json files in ``example/`` folder and later, the appropriate documentation).
 * Make the single call to set up the QMenu and Q{Mac}ToolBar with the QFile parameter
 
-How To Initialize:
+**How To Initialize:**
 
 ```
 	#include <qt5menugen.h>
@@ -108,6 +108,22 @@ A super easy example is a QAction that closes the application.
     }
 ]
 ```
+
+**Building Documentation:**
+
+On OS X, if you have Doxygen installed as an application in ``/Applications``, try this from the ``qt5menugen`` directory:
+
+```
+	/Applications/Doxygen.app/Contents/Resources/doxygen Doxyfile
+```
+
+Otherwise, assuming doxygen is on your path:
+
+```
+	doxygen Doxyfile
+```
+
+Documentation will be placed in the ``docs/`` directory in latex and html formats.
 
 ### Additional Details
 

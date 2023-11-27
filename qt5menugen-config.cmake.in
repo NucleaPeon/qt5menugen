@@ -1,0 +1,18 @@
+set(qt5menugen_VERSION @VERSION@)
+
+@PACKAGE_INIT@
+
+set(qt5menugen_FOUND FALSE)
+
+# Set variables needed for the package configuration
+find_path(qt5menugen_INCLUDE_DIR NAMES qt5menugen.h PATH_SUFFIXES include)
+find_library(qt5menugen_LIBRARY NAMES qt5menugen)
+
+if (qt5menugen_INCLUDE_DIR AND qt5menugen_LIBRARY)
+    set(qt5menugen_FOUND TRUE)
+endif()
+
+# Create imported target for the package
+add_library(qt5menugen INTERFACE IMPORTED)
+target_include_directories(qt5menugen INTERFACE ${qt5menugen_INCLUDE_DIR})
+target_link_libraries(qt5menugen INTERFACE ${qt5menugen_LIBRARY})

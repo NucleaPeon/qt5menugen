@@ -5,6 +5,9 @@ project(ExampleWindow
         DESCRIPTION "Example MainWindow with Qt5MenuGen library building toolbars and menus")
 
 find_package(Qt5 REQUIRED Widgets)
+include(FindPkgConfig)
+find_package(qt5menugen CONFIG REQUIRED 2.0.1)
+
 if(APPLE)
 	find_package(Qt5 REQUIRED MacExtras)
 elseif(MSVC)

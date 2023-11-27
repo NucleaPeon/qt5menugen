@@ -60,7 +60,7 @@ bool QtMenuGen::loadFile(QUrl path)
 
 const QtMenuGen::QJsonDocument jsonDocument()
 {
-	return this->jdoc;
+    return this->jdoc;
 }
 
 void QtMenuGen::setup(QWidget *widget, QObject *slotobj)
@@ -78,13 +78,13 @@ void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
 {
     mb = setupMenus(window);
     window->setMenuBar(mb);
- #ifdef Q_OS_MAC
-     tb = setupOSXToolBar(window, slotobj);
- #endif
- #ifdef Q_OS_LINUX
-     tb = setupNixToolBar(window, slotobj);
-     window->addToolBar(tb);
- #endif
+#ifdef Q_OS_MAC
+    tb = setupOSXToolBar(window, slotobj);
+#endif
+#ifdef Q_OS_LINUX
+    tb = setupNixToolBar(window, slotobj);
+    window->addToolBar(tb);
+#endif
 }
 
 QMap<QString, int> QtMenuGen::load_shortcuts()
@@ -720,49 +720,49 @@ QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
             }
             const QString sc = QObject::tr(actobj.value("shortcut").toString().toLatin1().data());
             if (! sc.isNull() && ! sc.isEmpty()) {
-            	if (sc.contains("Qt::") || sc.contains("QKeySequence::")) {
+                if (sc.contains("Qt::") || sc.contains("QKeySequence::")) {
                     if (sc.contains("Qt::")) {
                         qWarning("Qt:: enum detected for key, but this is not yet supported");
                     }
-					// Split by +, use entire string (____::____) as key for int value, then use it to generate the QKeySequence.
-					QStringList lst = sc.split("+");
-					QKeySequence seq;
-					switch(lst.size()) {
-					case 1:
+                    // Split by +, use entire string (____::____) as key for int value, then use it to generate the QKeySequence.
+                    QStringList lst = sc.split("+");
+                    QKeySequence seq;
+                    switch(lst.size()) {
+                    case 1:
                         if (shortcuts.contains(lst.at(0)))
                             seq = QKeySequence((QKeySequence::StandardKey) shortcuts.value(lst.at(0)));
 
-						break;
-					case 2:
+                        break;
+                    case 2:
                         if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1)))
                             seq = QKeySequence((int) shortcuts.value(lst.at(0)),
-                                               (int) shortcuts.value(lst.at(1)));
+                                            (int) shortcuts.value(lst.at(1)));
 
-						break;
-					case 3:
+                        break;
+                    case 3:
                         if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
                                 && shortcuts.contains(lst.at(2)))
                             seq = QKeySequence((int) shortcuts.value(lst.at(0)),
-                                               (int) shortcuts.value(lst.at(1)),
-                                               (int) shortcuts.value(lst.at(2)));
+                                            (int) shortcuts.value(lst.at(1)),
+                                            (int) shortcuts.value(lst.at(2)));
 
-						break;
-					case 4:
+                        break;
+                    case 4:
                         if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
                                 && shortcuts.contains(lst.at(2)) && shortcuts.contains(lst.at(3)))
                             seq = QKeySequence((int) shortcuts.value(lst.at(0)),
-                                               (int) shortcuts.value(lst.at(1)),
-                                               (int) shortcuts.value(lst.at(2)),
-                                               (int) shortcuts.value(lst.at(3)));
+                                            (int) shortcuts.value(lst.at(1)),
+                                            (int) shortcuts.value(lst.at(2)),
+                                            (int) shortcuts.value(lst.at(3)));
 
-						break;
-					default:
-						break;
-					}
-					act->setShortcut(seq);
-	          	} else {
-	                act->setShortcut(QKeySequence::fromString(sc));
-	            }
+                        break;
+                    default:
+                        break;
+                    }
+                    act->setShortcut(seq);
+                } else {
+                    act->setShortcut(QKeySequence::fromString(sc));
+                }
             }
             act->setEnabled(actobj.value("enabled").toBool(true));
             m->addAction(act);

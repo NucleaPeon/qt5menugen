@@ -62,15 +62,15 @@
 ## About The Project
 ``qt5menugen``: Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file.
 
-Instead of having many QMenu and QAction declarations in your qt5 c++ header files, this allows initialization and retrieval of QActions in one statement. Library comes with an example project to see how it is used.
+Instead of having many QMenu and QAction declarations in your qt5 c++ header files, this library automates all ``QMenu``, ``QToolBar`` and ``QAction`` initialization based on the contents of a JSON file.
 
 
 ### Quickstart
 
 Using this library requires that you:
 
-* Have a .json file included in your project and abides by the specification (todo, see existing json files in ``example/`` folder and later, the appropriate documentation).
-* Make the single call to set up the QMenu and Q{Mac}ToolBar with the QFile parameter
+* Have a .json file included in your project that abides by the specification (TODO, see existing json files in ``example/`` folder and later, the appropriate documentation).
+* Construct the QtMenuGen object and call ``setup()`` on it.
 
 **How To Initialize:**
 
@@ -84,11 +84,12 @@ Using this library requires that you:
         QtMenuGen menugen = new QtMenuGen(":/menu.json");
         menugen->setup(this, this);
     }
+
 ```
 
-*QtMenuGen can take a QUrl or a QString path, the ":" denotes a Qt Resource file path.*
+*QtMenuGen can take a QUrl or a QString path. The ":" denotes a path from a Qt Resource file.*
 
-A super easy example is a QAction that closes the application.
+A simple example is having a .json file that sets up a QAction that closes the application.
 
 ```
 [
@@ -111,16 +112,15 @@ A super easy example is a QAction that closes the application.
 
 **Building Documentation:**
 
+```
+    doxygen Doxyfile
+```
+
+
 On OS X, if you have Doxygen installed as an application in ``/Applications``, try this from the ``qt5menugen`` directory:
 
 ```
     /Applications/Doxygen.app/Contents/Resources/doxygen Doxyfile
-```
-
-Otherwise, assuming doxygen is on your path:
-
-```
-    doxygen Doxyfile
 ```
 
 Documentation will be placed in the ``docs/`` directory in latex and html formats.
@@ -130,21 +130,19 @@ Documentation will be placed in the ``docs/`` directory in latex and html format
 
 **SLOTS**
 
-Slots are handled by writing out the method name including parens as a string in the json file, then expecting that method to be on the object that contains the toolbar/menus.
+QActions will call a slot on the ``triggered()`` event. Slots are handled by writing out the method name including parens as a string in the json file, then expecting that method to be on the object that contains the toolbar/menus.
 
 Toolbars and Menus are supported on ``QWidget``'s and ``QMainWindow``'s.
 
-Essentially ``"slot": "close()"`` calls the mainwindow's close() slot (it already exists) and so this handles icon/shortcut/QAction/QMenu and if desired, a QToolBar item (QAction or QMacToolBarItem).
+Essentially ``"slot": "close()"`` calls the mainwindow's close() slot (it already exists) and so this handles icon/shortcut/QAction/QMenu and if desired, a ``QToolBar`` item (``QAction`` or ``QMacToolBarItem``).
 
 **SHORTCUTS**
 
 Shortcuts can either be a string of Key names and ``+`` to append them.
-Example: ``Ctrl+P`` for a print shortcut, but recommended to use "QKeySequence::Print" instead because it better covers multi-platform support.
+Example: ``Ctrl+P`` for a print shortcut, but recommended to use "QKeySequence::Print" instead because it is more readable. OS X Command shortcuts are already transposed; Ctrl+P = Command+P so there's no need to print out the native name of mac particulars.
 
 QtMenuGen supports utilizing ``StandardKey`` enum shortcuts. for better multiplatform handling and is recommended to use these first. See the QKeySequence Qt documentation for a list, or check qt5menugen.cpp for the
 QMap we use to handle enum key loookup.
-
-<b>The ``StandardKey`` enum hasn't changed between Qt5.3.2 and Qt5.15. Since Qt6 is being developed, we can restrict compatibility to just the Qt5.x series.</b>
 
 
 ### Oxygen Icon Licensing

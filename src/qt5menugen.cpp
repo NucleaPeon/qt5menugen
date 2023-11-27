@@ -46,6 +46,7 @@ bool QtMenuGen::loadFile(QString path)
         // If a previous loadFile() succeeds, loaded can be true. This only returns the current call result.
         return false;
     }
+    return this->loaded;
 }
 
 bool QtMenuGen::loadFile(QUrl path)
@@ -58,7 +59,7 @@ bool QtMenuGen::loadFile(QUrl path)
     }
 }
 
-const QtMenuGen::QJsonDocument jsonDocument()
+const QJsonDocument QtMenuGen::jsonDocument()
 {
     return this->jdoc;
 }
@@ -70,7 +71,7 @@ void QtMenuGen::setup(QWidget *widget, QObject *slotobj)
     tb = setupOSXToolBar(widget, slotobj);
 #endif
 #ifdef Q_OS_LINUX
-    tb = setupNixToolBar(widget, slotobj);
+    tb = setupToolBar(widget, slotobj);
 #endif
 }
 
@@ -82,7 +83,7 @@ void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
     tb = setupOSXToolBar(window, slotobj);
 #endif
 #ifdef Q_OS_LINUX
-    tb = setupNixToolBar(window, slotobj);
+    tb = setupToolBar(window, slotobj);
     window->addToolBar(tb);
 #endif
 }

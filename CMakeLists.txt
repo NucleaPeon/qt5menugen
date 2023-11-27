@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.3)
 project(qt5menugen
-        VERSION 2.0.0
+        VERSION 2.0.1
         DESCRIPTION "Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file"
         LANGUAGES CXX)
 
@@ -8,6 +8,8 @@ find_package(Qt5 REQUIRED
     Widgets
 )
 include(GNUInstallDirs)  # REQUIRED TO INSTALL PKGCONFIG TO PROPER DIR!
+
+message(STATUS "CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_MODULE_PATH}")
 
 list(APPEND QT5MENUGEN_HEADERS
 	src/qt5menugen.h
@@ -50,3 +52,5 @@ message(STATUS "${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig")
 
 install(FILES ${CMAKE_BINARY_DIR}/src/qt5menugen.pc DESTINATION
 	${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/qt5menugen DESTINATION
+	"${CMAKE_INSTALL_LIBDIR}/cmake")

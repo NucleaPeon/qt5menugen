@@ -75,14 +75,14 @@ Using this library requires that you:
 **How To Initialize:**
 
 ```
-	#include <qt5menugen.h>
+    #include <qt5menugen.h>
 
-	class QWidget/QMainWindow ...
-	...
+    class QWidget/QMainWindow ...
+    ...
 
-	{
-		QtMenuGen menugen = new QtMenuGen(":/menu.json");
-    	menugen->setup(this, this);
+    {
+        QtMenuGen menugen = new QtMenuGen(":/menu.json");
+        menugen->setup(this, this);
     }
 ```
 
@@ -95,10 +95,10 @@ A super easy example is a QAction that closes the application.
     {
         "name": "&File",
         "actions": [
-        		{
-            	"name": "quit",
-           		"text": "&Quit",
-          		"toolbar_hidden": true,
+                {
+                "name": "quit",
+                "text": "&Quit",
+                "toolbar_hidden": true,
                 "shortcut": "Ctrl+Q",
                 "icon": ":/icons/dialog-close.png",
                 "slot": "close()",
@@ -114,13 +114,13 @@ A super easy example is a QAction that closes the application.
 On OS X, if you have Doxygen installed as an application in ``/Applications``, try this from the ``qt5menugen`` directory:
 
 ```
-	/Applications/Doxygen.app/Contents/Resources/doxygen Doxyfile
+    /Applications/Doxygen.app/Contents/Resources/doxygen Doxyfile
 ```
 
 Otherwise, assuming doxygen is on your path:
 
 ```
-	doxygen Doxyfile
+    doxygen Doxyfile
 ```
 
 Documentation will be placed in the ``docs/`` directory in latex and html formats.

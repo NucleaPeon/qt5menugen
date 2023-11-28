@@ -65,6 +65,20 @@
 Instead of having many QMenu and QAction declarations in your qt5 c++ header files, this library automates all ``QMenu``, ``QToolBar`` and ``QAction`` initialization based on the contents of a JSON file.
 
 
+### Using in your CMake Project
+
+In the recent v2.0.3 release, we now support ``find_package()`` as a way to determine package version.
+
+To use within a CMake file:
+
+```
+    find_package(qt5menugen CONFIG REQUIRED 2.0.3)
+
+    ...
+
+    target_link_libraries(${PROJECT_NAME} qt5menugen)
+```
+
 ### Quickstart
 
 Using this library requires that you:

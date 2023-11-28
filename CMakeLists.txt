@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 3.3)
 
 set(VERSION_MAJOR 2 CACHE STRING "Project major version number.")
 set(VERSION_MINOR 0 CACHE STRING "Project minor version number.")
-set(VERSION_PATCH 1 CACHE STRING "Project patch version number.")
+set(VERSION_PATCH 3 CACHE STRING "Project patch version number.")
 set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH VERSION)
+message(STATUS "Building ${PROJECT_NAME} version ${VERSION}")
 project(qt5menugen
         VERSION ${VERSION}
         DESCRIPTION "Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file"
@@ -77,7 +78,7 @@ configure_package_config_file(${PROJECT_NAME}-config.cmake.in
   PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
 write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
-  VERSION 2.0.1
+  VERSION ${VERSION}
   COMPATIBILITY SameMajorVersion )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake

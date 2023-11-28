@@ -5,8 +5,7 @@ project(ShortcutTester
         DESCRIPTION "Example MainWindow that shows how shortcuts are set / reset and using StandardKey enum")
 
 find_package(Qt5 REQUIRED Widgets)
-include(FindPkgConfig)
-find_package(qt5menugen CONFIG REQUIRED 2.0.1)
+find_package(qt5menugen CONFIG REQUIRED 2.0.3)
 
 if(APPLE)
 	find_package(Qt5 REQUIRED MacExtras)

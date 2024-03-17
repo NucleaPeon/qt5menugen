@@ -1,5 +1,4 @@
 #include "qt5menugen.h"
-#include <QtCore/QDebug>
 
 QtMenuGen::QtMenuGen(QString path)
 {
@@ -702,10 +701,6 @@ QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
 {
     if (obj.isEmpty()) {
         obj = this->jsonDocument().object();
-    }
-    if (m == 0 || m == NULL) {
-        qDebug() << "NULL MENU";
-
     }
 	m->setTitle(obj.value("name").toString(""));
 	QJsonArray arr = obj.value("actions").toArray();

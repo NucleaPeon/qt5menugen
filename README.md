@@ -202,7 +202,7 @@ You will need:
 
 ### Installation
 
-**Note** I recommend calling ``make -jN`` where ``N`` is the number of cores of your cpu.
+**Note** I recommend calling ``make -jN`` where ``N`` is the number of cores of your cpu. Calling ``make -j`` without a number should also use all cores.
 
 <hr>
 
@@ -254,7 +254,7 @@ See the included ``example/`` project for including it in a project.
 
 ## Known Issues
 
-* This project is affected by https://bugreports.qt.io/browse/QTBUG-38256 on OSX. In particular, setting a shortcut to Delete (Qt::Key_Delete/Key_Backspace) or using the StandardKey enum Delete will work on OSX. This is not something this project can **fix**, it will require a workaround or a fix in the Qt 5.3.x fork. See https://forum.qt.io/topic/35591/single-key-qaction-shortcuts-don-t-work-on-mac-os-x-qt-5-x for more context.
+* This project is affected by https://bugreports.qt.io/browse/QTBUG-38256 on OSX. In particular, setting a shortcut to Delete (Qt::Key_Delete/Key_Backspace) or using the StandardKey enum Delete will not work on OSX. This is not something this project can **fix**, it will require a workaround or a fix in the Qt 5.3.x fork. See https://forum.qt.io/topic/35591/single-key-qaction-shortcuts-don-t-work-on-mac-os-x-qt-5-x for more context.
 
 * This library contains its own pkgconfig .pc file (and a [pkg]-config.cmake) to allow find_package() to function. By default, it will be installed to ``/usr/local/share/pkgconfig`` even on OSX. It's possible that OSX expects /usr/lib/pkgconfig, so use ``-DCMAKE_INSTALL_DATAROOTDIR="usr/lib"`` to avoid that. If you encounter a bug, please file an issue.
 

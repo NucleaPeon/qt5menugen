@@ -1,17 +1,14 @@
 cmake_minimum_required(VERSION 3.3)
-
-set(VERSION_MAJOR 2 CACHE STRING "Project major version number.")
-set(VERSION_MINOR 0 CACHE STRING "Project minor version number.")
-set(VERSION_PATCH 3 CACHE STRING "Project patch version number.")
-set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH VERSION)
-message(STATUS "Building ${PROJECT_NAME} version ${VERSION}")
+#
 project(qt5menugen
-        VERSION ${VERSION}
+        VERSION 2.1.0
         DESCRIPTION "Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file"
         LANGUAGES CXX)
 
 include(GNUInstallDirs)  # REQUIRED TO INSTALL PKGCONFIG TO PROPER DIR, and after LANGUAGES is defined
+
+# Immediately set the version.h header
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h)
 
 
 find_package(Qt5 REQUIRED
@@ -25,6 +22,7 @@ set(PACKAGE_HEADERS
 list(APPEND QT5MENUGEN_HEADERS
 	src/qt5menugen.h
 	src/qt5menugen_global.h
+	src/version.h
 )
 
 list(APPEND QT5MENUGEN_SOURCES

@@ -1,4 +1,5 @@
 #include "qt5menugen.h"
+#include <QtCore/QDebug>
 
 QtMenuGen::QtMenuGen(QString path)
 {
@@ -86,6 +87,13 @@ void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
     tb = setupToolBar(window, slotobj);
     window->addToolBar(tb);
 #endif
+}
+
+void QtMenuGen::setup(QMenu *menu, QObject *slotobj, QJsonObject obj)
+{
+    if (obj.isEmpty()) { obj = this->jsonDocument().object(); }
+	menu = setupMenu(menu, slotobj, obj);
+	menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
 }
 
 QMap<QString, int> QtMenuGen::load_shortcuts()
@@ -684,95 +692,116 @@ const QMap<QString, int> QtMenuGen::getShortcuts()
     return this->shortcuts;
 }
 
+QMenu* QtMenuGen::setupMenu(QObject *slotobj, QJsonObject obj)
+{
+    QMenu* m = new QMenu();
+    return setupMenu(m, slotobj, obj);
+}
+
+QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
+{
+    if (obj.isEmpty()) {
+        obj = this->jsonDocument().object();
+    }
+    if (m == 0 || m == NULL) {
+        qDebug() << "NULL MENU";
+
+    }
+	m->setTitle(obj.value("name").toString(""));
+	QJsonArray arr = obj.value("actions").toArray();
+
+	foreach(QJsonValue actval, arr) {
+        QJsonObject actobj = actval.toObject();
+        if (actobj.contains("separator")) {
+            m->addSeparator();
+            continue;
+        }
+		if (! isValid(actobj)) { continue; }
+		const bool has_checked = actobj.contains("checked");
+		const bool has_group = actobj.contains("group");
+		const QIcon icon = QIcon(actobj.value("icon").toString());
+		QAction *act = new QAction(icon, actobj.value("text").toString(), m->parent());
+		act->setData(QVariant(actobj.value("name")));
+
+		if (has_checked) {
+			act->setCheckable(true);
+			act->setChecked(actobj.value("checked").toBool());
+			if (has_group) {
+				QActionGroup* group;
+				const QString groupname = actobj.value("group").toString();
+				if (group_map.contains(groupname)) {
+					group = group_map.value(groupname);
+				} else {
+					group = new QActionGroup(0);
+					group_map[groupname] = group;
+				}
+				group->addAction(act);
+			}
+		}
+		const QString sc = QObject::tr(actobj.value("shortcut").toString().toLatin1().data());
+		if (! sc.isNull() && ! sc.isEmpty()) {
+			if (sc.contains("Qt::") || sc.contains("QKeySequence::")) {
+				if (sc.contains("Qt::")) {
+					qWarning("Qt:: enum detected for key, but this is not yet supported");
+				}
+				// Split by +, use entire string (____::____) as key for int value, then use it to generate the QKeySequence.
+				QStringList lst = sc.split("+");
+				QKeySequence seq;
+				switch(lst.size()) {
+				case 1:
+					if (shortcuts.contains(lst.at(0)))
+						seq = QKeySequence((QKeySequence::StandardKey) shortcuts.value(lst.at(0)));
+
+					break;
+				case 2:
+					if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1)))
+						seq = QKeySequence((int) shortcuts.value(lst.at(0)),
+										(int) shortcuts.value(lst.at(1)));
+
+					break;
+				case 3:
+					if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
+							&& shortcuts.contains(lst.at(2)))
+						seq = QKeySequence((int) shortcuts.value(lst.at(0)),
+										(int) shortcuts.value(lst.at(1)),
+										(int) shortcuts.value(lst.at(2)));
+
+					break;
+				case 4:
+					if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
+							&& shortcuts.contains(lst.at(2)) && shortcuts.contains(lst.at(3)))
+						seq = QKeySequence((int) shortcuts.value(lst.at(0)),
+										(int) shortcuts.value(lst.at(1)),
+										(int) shortcuts.value(lst.at(2)),
+										(int) shortcuts.value(lst.at(3)));
+
+					break;
+				default:
+					break;
+				}
+				act->setShortcut(seq);
+			} else {
+				act->setShortcut(QKeySequence::fromString(sc));
+			}
+		}
+		act->setEnabled(actobj.value("enabled").toBool(true));
+		m->addAction(act);
+		QString slot = actobj.value("slot").toString();
+		if (! slot.isEmpty()) {
+			handleSignalSlot(act, "triggered()", slotobj, slot.toLocal8Bit().data());
+		}
+		action_map[actobj.value("name").toString().toLower().replace("&", "")] = act;
+	}
+	return m;
+}
+
 QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
 {
     QMenuBar *mb = new QMenuBar(widget);
     QJsonArray arr = jdoc.array();
     foreach(QJsonValue val, arr) {
         QJsonObject obj = val.toObject();
-        QMenu *m = new QMenu(obj.value("name").toString(""));
-        foreach(QJsonValue actval, obj.value("actions").toArray()) {
-            QJsonObject actobj = actval.toObject();
-            if (actobj.contains("separator")) {
-                m->addSeparator();
-                continue;
-            }
-            if (! isValid(actobj)) { continue; }
-            const bool has_checked = actobj.contains("checked");
-            const bool has_group = actobj.contains("group");
-            const QIcon icon = QIcon(actobj.value("icon").toString());
-            QAction *act = new QAction(icon, actobj.value("text").toString(), m->parent());
-            act->setData(QVariant(actobj.value("name")));
-
-            if (has_checked) {
-                act->setCheckable(true);
-                act->setChecked(actobj.value("checked").toBool());
-                if (has_group) {
-                    QActionGroup* group;
-                    const QString groupname = actobj.value("group").toString();
-                    if (group_map.contains(groupname)) {
-                        group = group_map.value(groupname);
-                    } else {
-                        group = new QActionGroup(0);
-                        group_map[groupname] = group;
-                    }
-                    group->addAction(act);
-                }
-            }
-            const QString sc = QObject::tr(actobj.value("shortcut").toString().toLatin1().data());
-            if (! sc.isNull() && ! sc.isEmpty()) {
-                if (sc.contains("Qt::") || sc.contains("QKeySequence::")) {
-                    if (sc.contains("Qt::")) {
-                        qWarning("Qt:: enum detected for key, but this is not yet supported");
-                    }
-                    // Split by +, use entire string (____::____) as key for int value, then use it to generate the QKeySequence.
-                    QStringList lst = sc.split("+");
-                    QKeySequence seq;
-                    switch(lst.size()) {
-                    case 1:
-                        if (shortcuts.contains(lst.at(0)))
-                            seq = QKeySequence((QKeySequence::StandardKey) shortcuts.value(lst.at(0)));
-
-                        break;
-                    case 2:
-                        if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1)))
-                            seq = QKeySequence((int) shortcuts.value(lst.at(0)),
-                                            (int) shortcuts.value(lst.at(1)));
-
-                        break;
-                    case 3:
-                        if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
-                                && shortcuts.contains(lst.at(2)))
-                            seq = QKeySequence((int) shortcuts.value(lst.at(0)),
-                                            (int) shortcuts.value(lst.at(1)),
-                                            (int) shortcuts.value(lst.at(2)));
-
-                        break;
-                    case 4:
-                        if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
-                                && shortcuts.contains(lst.at(2)) && shortcuts.contains(lst.at(3)))
-                            seq = QKeySequence((int) shortcuts.value(lst.at(0)),
-                                            (int) shortcuts.value(lst.at(1)),
-                                            (int) shortcuts.value(lst.at(2)),
-                                            (int) shortcuts.value(lst.at(3)));
-
-                        break;
-                    default:
-                        break;
-                    }
-                    act->setShortcut(seq);
-                } else {
-                    act->setShortcut(QKeySequence::fromString(sc));
-                }
-            }
-            act->setEnabled(actobj.value("enabled").toBool(true));
-            m->addAction(act);
-            QString slot = actobj.value("slot").toString();
-            if (! slot.isEmpty()) {
-                handleSignalSlot(act, "triggered()", widget, slot.toLocal8Bit().data());
-            }
-            action_map[actobj.value("name").toString().toLower().replace("&", "")] = act;
-        }
+        QMenu *m = setupMenu(widget, obj);
         menu_map[obj.value("name").toString("").toLower().replace("&", "")] = m;
         mb->addMenu(m);
     }
@@ -839,7 +868,7 @@ QMacToolBar* QtMenuGen::setupOSXToolBar(QWidget *widget, QObject *slotobj)
             }
             QString slot = actobj.value("slot").toString();
             if (! slot.isEmpty()) {
-                handleSignalSlot(tbitem, "activated()", widget, slot.toLocal8Bit().data());
+                handleSignalSlot(tbitem, "activated()", slotobj, slot.toLocal8Bit().data());
             }
         }
     }

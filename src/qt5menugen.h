@@ -139,6 +139,40 @@ public:
     void setup(QMainWindow *window, QObject *slotobj);
 
     /*!
+     * \brief setup configures the Menu with a json file containing a json object with {name: "", actions: []}.
+     *
+     * QMenu* will be reassigned to the content in the json file and returned.
+     * The json required to set just the menu is
+     *
+     * {
+     *      "name": "....",
+     *      "actions": [
+     *          { ... }
+     *      ]
+     * }
+     *
+     * same as a json file that specifies multiple menus, but just the individual menu QJsonObject.
+     *
+     * \code{.cpp}
+     * #include <qtmenugen.h>
+     *
+     * // ...
+     * {
+     *     // Title is specified in the json file
+     *     QMenu *contextMenu = new QMenu();
+     *     this->qtmg = QtMenuGen(":/files/just_one_menu.json");
+     *     this->qtmg.setup(contextMenu, this);
+     * }
+     * \endcode
+     *
+     * \param menu QMenu*
+     * \param slotobj QObject*
+     * \version 2.1.0
+     *
+     */
+    void setup(QMenu *menu, QObject *slotobj, QJsonObject obj = QJsonObject());
+
+    /*!
      * \brief actionByName Return the QAction* object based on the name assigned to it in the json file
      *
      * \param name QString
@@ -190,6 +224,30 @@ private:
     QMap<QString, QActionGroup*> group_map;
     QMap<QString, QMenu*> menu_map;
     QMenuBar* mb;
+
+	/*!
+     * \brief Internal method to setup a single menu
+     *
+	 * Creates a new menu (default behaviour internally) and sets it up, then
+     * returns it.
+     *
+     * \param QJsonObject obj: If empty, pulls from the jsonDocument() contents
+     *
+	 * \version 2.1.0
+	 */
+    QMenu* setupMenu(QObject* slotobj, QJsonObject obj = QJsonObject());
+    /*!
+     * \brief Internal method to setup a single menu
+     *
+     * For use with a single menu generation only (ie: for contextual menus) using \c setup(QMenu, QObject);
+     * wherein it reuses the passed in QMenu* object.
+	 *
+	 * If \c QJsonObject \c obj is empty, we pull from \c this->jsonDocument(). This is set internally to work with json files that contain multiple menus.
+	 * Normal users shouldn't have to set this at all.
+	 *
+	 * \version 2.1.0
+	 */
+    QMenu* setupMenu(QMenu* m, QObject *slotobj, QJsonObject obj = QJsonObject());
 
     QMenuBar* setupMenus(QWidget *widget);
     QMap<QString, int> load_shortcuts();

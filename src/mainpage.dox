@@ -12,11 +12,11 @@
  *
  * \section install_sec Installation
  *
- * This will install the library to /usr/local/lib.
+ * This will install the library to /usr/lib.
  *
  * \code{.sh}
  * cd build/
- * cmake ..
+ * cmake .. -DCMAKE_INSTALL_DATAROOTDIR="usr/lib"
  * make -j2
  * sudo make install
  * \endcode

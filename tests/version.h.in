@@ -1,0 +1,24 @@
+#ifndef SUNDAYBEACON_TESTS_VERSION_H
+#define SUNDAYBEACON_TESTS_VERSION_H
+
+// Compiler accessible definitions
+
+#define SUNDAYBEACON_TESTS_VERSION_RELEASE "@PROJECT_VERSION_MAJOR@"
+#define SUNDAYBEACON_TESTS_VERSION_MAJOR "@PROJECT_VERSION_MINOR@"
+#define SUNDAYBEACON_TESTS_VERSION_MINOR "@PROJECT_VERSION_PATCH@"
+#define SUNDAYBEACON_TESTS_VERSION_PATCH "@PROJECT_VERSION_TWEAK@"
+
+// Program accessible definitions
+
+namespace SundayBeacon {
+    namespace Testing {
+	namespace Version {
+            const int RELEASE = @PROJECT_VERSION_MAJOR@;
+            const int MAJOR = @PROJECT_VERSION_MINOR@;
+            const int MINOR = @PROJECT_VERSION_PATCH@;
+            const int PATCH = @PROJECT_VERSION_TWEAK@;
+	}
+    }
+}
+
+#endif // SUNDAYBEACON_TESTS_VERSION_H

@@ -19,8 +19,6 @@
 #include <QActionGroup>
 #include <QMap>
 
-#include <QDebug>
-
 #ifdef Q_OS_MAC
 #include <QMacToolBar>
 #include <QMacToolBarItem>
@@ -173,7 +171,6 @@ public:
      *
      */
     void setup(QMenu *menu, QObject *slotobj, QJsonObject obj = QJsonObject());
-
     /*!
      * \brief actionByName Return the QAction* object based on the name assigned to it in the json file
      *
@@ -253,8 +250,28 @@ private:
 
     QMenuBar* setupMenus(QWidget *widget);
     QMap<QString, int> load_shortcuts();
+    /*!
+     * \brief handleSignalSlot Connects the signal to the slot
+     *
+     * \param connector
+     * \param signal Currently this is only set to "triggered()" from the calling method
+     * \param caller
+     * \param slot
+     */
     void handleSignalSlot(QObject *connector, const char *signal, QObject *caller, const char *slot);
+    
     bool isValid(const QJsonObject obj);
+
+    /*!
+     * \brief warn Convenience method to produce qWarnings() with QString parameter
+     *
+     * This helps build strings to add in parameters with .arg()
+     *
+     * \param message to send to qWarning()
+     *
+     * \version 2.1.1
+     */
+    void warn(QString message);
 
 #ifdef Q_OS_MAC
     QMacToolBar *tb;

@@ -91,8 +91,9 @@ void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
 void QtMenuGen::setup(QMenu *menu, QObject *slotobj, QJsonObject obj)
 {
     if (obj.isEmpty()) { obj = this->jsonDocument().object(); }
+    const QMetaObject *metaConn = slotobj->metaObject();
 	menu = setupMenu(menu, slotobj, obj);
-	menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
+    menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
 }
 
 QMap<QString, int> QtMenuGen::load_shortcuts()
@@ -704,8 +705,6 @@ QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
     }
 	m->setTitle(obj.value("name").toString(""));
 	QJsonArray arr = obj.value("actions").toArray();
-
-    qDebug() << arr;
     foreach(QJsonValue actval, arr) {
         QJsonObject actobj = actval.toObject();
         if (actobj.contains("separator")) {
@@ -888,13 +887,14 @@ void QtMenuGen::handleSignalSlot(QObject *connector, const char *signal, QObject
 {
     const QMetaObject *metaConn = connector->metaObject();
     int sigIdx = metaConn->indexOfSignal(signal);
-    if (sigIdx < 0) { qWarning("Menu/Toolbar signal method not found"); return; }
+    if (sigIdx < 0) { warn(QString("qt5menugen: %1: %2").arg("signal method not found").arg(signal)); return; }
     const QMetaMethod sigMethod = metaConn->method(sigIdx);
 
     const QMetaObject *metaCall = caller->metaObject();
     int slotIdx = metaCall->indexOfSlot(slot);
-    if (sigIdx < 0) { qWarning("Menu/Toolbar slot method not found"); return; }
+    if (slotIdx < 0) { warn(QString("qt5menugen: %1: %2 on %3").arg("slot method not found").arg(slot).arg(metaCall->className())); return; }
     const QMetaMethod slotMethod = metaCall->method(slotIdx);
+
     QObject::connect(connector, sigMethod, caller, slotMethod);
 }
 
@@ -902,5 +902,11 @@ bool QtMenuGen::isValid(const QJsonObject obj)
 {
     return (obj.contains("name") && (
             ! obj.value("icon").toString().isEmpty() ||
-            ! obj.value("text").toString().isEmpty()) );
+                ! obj.value("text").toString().isEmpty()) );
+}
+
+void QtMenuGen::warn(QString message)
+{
+    qWarning(message.toStdString().c_str());
+
 }

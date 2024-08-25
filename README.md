@@ -95,7 +95,7 @@ Using this library requires that you:
     ...
 
     {
-        QtMenuGen menugen = new QtMenuGen(":/menu.json");
+        QtMenuGen *menugen = new QtMenuGen(":/menu.json");
         menugen->setup(this, this);
     }
 
@@ -111,6 +111,27 @@ A simple example is having a .json file that sets up a QAction that closes the a
         "name": "&File",
         "actions": [
                 {
+                    "name": "quit",
+                    "text": "&Quit",
+                    "toolbar_hidden": true,
+                    "shortcut": "Ctrl+Q",
+                    "icon": ":/icons/dialog-close.png",
+                    "slot": "close()",
+                    "comment": "This will be applied to mac osx application menu automatically."
+            },
+        ]
+    }
+]
+```
+
+If you are building a menu for a ``QMenu`` object, take the above example and remove the outer array
+so it is just a QJsonObject entity:
+
+```
+{
+    "name": "&File",
+    "actions": [
+            {
                 "name": "quit",
                 "text": "&Quit",
                 "toolbar_hidden": true,
@@ -118,10 +139,10 @@ A simple example is having a .json file that sets up a QAction that closes the a
                 "icon": ":/icons/dialog-close.png",
                 "slot": "close()",
                 "comment": "This will be applied to mac osx application menu automatically."
-            },
-        ]
-    }
-]
+        },
+    ]
+}
+
 ```
 
 **Building Documentation:**

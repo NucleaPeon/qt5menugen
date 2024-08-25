@@ -705,7 +705,8 @@ QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
 	m->setTitle(obj.value("name").toString(""));
 	QJsonArray arr = obj.value("actions").toArray();
 
-	foreach(QJsonValue actval, arr) {
+    qDebug() << arr;
+    foreach(QJsonValue actval, arr) {
         QJsonObject actobj = actval.toObject();
         if (actobj.contains("separator")) {
             m->addSeparator();

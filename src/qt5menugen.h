@@ -19,6 +19,8 @@
 #include <QActionGroup>
 #include <QMap>
 
+#include <QDebug>
+
 #ifdef Q_OS_MAC
 #include <QMacToolBar>
 #include <QMacToolBarItem>

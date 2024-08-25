@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 #
 project(qt5menugen
-        VERSION 2.1.0
+        VERSION 2.1.1
         DESCRIPTION "Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file"
         LANGUAGES CXX)
 
@@ -10,6 +10,11 @@ include(GNUInstallDirs)  # REQUIRED TO INSTALL PKGCONFIG TO PROPER DIR, and afte
 # Immediately set the version.h header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h)
 
+
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
 find_package(Qt5 REQUIRED
     Core
@@ -41,11 +46,15 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
+
+
 list(APPEND TEST_SOURCES
     tests/test_runner.cpp
+    tests/test_qwidget_menu.cpp
 )
 
 list(APPEND TEST_HEADERS
+    tests/test_qwidget_menu.h
 )
 
 list(APPEND TEST_UIS

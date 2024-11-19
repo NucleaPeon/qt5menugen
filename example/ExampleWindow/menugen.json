@@ -35,7 +35,12 @@
             },
             {
 	            "name": "Test",
-                "actions": []
+                "actions": [
+                	{
+                		"name": "test-submenu",
+                		"text": "Submenu Test"
+            		}
+                ]
             },
             {
                 "separator": true

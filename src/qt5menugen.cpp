@@ -1,5 +1,4 @@
 #include "qt5menugen.h"
-#include <QDebug>
 
 QtMenuGen::QtMenuGen(QString path)
 {
@@ -712,20 +711,20 @@ QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
             m->addSeparator();
             continue;
         }
-		if (! isValid(actobj)) { warn("invalid detected"); continue; }
+		if (! isValid(actobj)) { continue; }
 		const bool has_checked = actobj.contains("checked");
 		const bool has_group = actobj.contains("group");
-
-		qDebug() << actobj;
+		const QString name = actobj.value("name").toString();
+		const QIcon icon = QIcon(actobj.value("icon").toString());
 		if (actobj.contains("actions")) {
-			warn("We are creating a submenu");
-			m->addSeparator();
+			QMenu *submenu = new QMenu();
+			submenu = setupMenu(submenu, slotobj, actobj);
+			m->addMenu(submenu);
 			continue;
 		}
 
-		const QIcon icon = QIcon(actobj.value("icon").toString());
 		QAction *act = new QAction(icon, actobj.value("text").toString(), m->parent());
-		act->setData(QVariant(actobj.value("name")));
+		act->setData(QVariant(name));
 
 		if (has_checked) {
 			act->setCheckable(true);

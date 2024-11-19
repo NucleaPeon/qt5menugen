@@ -1,4 +1,5 @@
 #include "qt5menugen.h"
+#include <QDebug>
 
 QtMenuGen::QtMenuGen(QString path)
 {
@@ -711,9 +712,17 @@ QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
             m->addSeparator();
             continue;
         }
-		if (! isValid(actobj)) { continue; }
+		if (! isValid(actobj)) { warn("invalid detected"); continue; }
 		const bool has_checked = actobj.contains("checked");
 		const bool has_group = actobj.contains("group");
+
+		qDebug() << actobj;
+		if (actobj.contains("actions")) {
+			warn("We are creating a submenu");
+			m->addSeparator();
+			continue;
+		}
+
 		const QIcon icon = QIcon(actobj.value("icon").toString());
 		QAction *act = new QAction(icon, actobj.value("text").toString(), m->parent());
 		act->setData(QVariant(actobj.value("name")));
@@ -902,7 +911,8 @@ bool QtMenuGen::isValid(const QJsonObject obj)
 {
     return (obj.contains("name") && (
             ! obj.value("icon").toString().isEmpty() ||
-                ! obj.value("text").toString().isEmpty()) );
+                ! obj.value("text").toString().isEmpty() ||
+                	obj.contains("actions")) );
 }
 
 void QtMenuGen::warn(QString message)

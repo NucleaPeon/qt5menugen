@@ -285,6 +285,8 @@ See the included ``example/`` project for including it in a project.
 ## Roadmap
 
 - [ ] Improve documentation
+-     [ ] Add docs on groups
+-     [ ] Add docs on checked values
 - [ ] Allow QUrl's to be passed in, even if it means converting them to QFile and not allowing remote files to be used.
 - [ ] Add/release static versions or include instructions and qt5 5.3.2 statically compiled binaries
 - [ ] Create a debian release package

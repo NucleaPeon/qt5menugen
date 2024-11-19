@@ -34,6 +34,10 @@
                 "slot": "saveAs()"
             },
             {
+	            "name": "Test",
+                "actions": []
+            },
+            {
                 "separator": true
             },
             {

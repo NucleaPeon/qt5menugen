@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 #
 project(qt5menugen
-        VERSION 2.1.1
+        VERSION 2.2.0
         DESCRIPTION "Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file"
         LANGUAGES CXX)
 

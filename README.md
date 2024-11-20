@@ -145,6 +145,45 @@ so it is just a QJsonObject entity:
 
 ```
 
+You can write submenus by having the ``name`` and ``actions`` keys and the corresponding array within the JSON object:
+
+```
+[
+    {
+        "name": "&File",
+        "actions": [
+        		{
+        			"name": new",
+        			"text": "&New",
+        			"shortcut": "Ctrl+N",
+        			"slot: "new()"
+        		},
+        		{
+        			"name": "&Export",
+        			"actions": [
+        				{
+        					"name": "export-as-pdf",
+        					"text": "Export as &PDF",
+        					"slot": "exportAsPDF()",
+        					"icon": ":/icons/export/pdf.png"
+        				}
+        			]
+        		},
+                {
+                    "name": "quit",
+                    "text": "&Quit",
+                    "shortcut": "Ctrl+Q",
+                    "icon": ":/icons/dialog-close.png",
+                    "slot": "close()",
+                    "comment": "This will be applied to mac osx application menu automatically."
+            },
+        ]
+    }
+]
+```
+
+An empty submenu simply requires an empty ``actions`` array; there may be cases where you plan to fill it in later.
+
 **Building Documentation:**
 
 ```

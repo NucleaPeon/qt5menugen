@@ -153,7 +153,7 @@ You can write submenus by having the ``name`` and ``actions`` keys and the corre
         "name": "&File",
         "actions": [
         		{
-        			"name": new",
+				"name": new",
         			"text": "&New",
         			"shortcut": "Ctrl+N",
         			"slot: "new()"

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 #
 project(qt5menugen
-        VERSION 2.2.0
+        VERSION 2.3.0
         DESCRIPTION "Generate Mac OSX, Windows and Linux -specific toolbars and menus via a json file"
         LANGUAGES CXX)
 
@@ -9,8 +9,6 @@ include(GNUInstallDirs)  # REQUIRED TO INSTALL PKGCONFIG TO PROPER DIR, and afte
 
 # Immediately set the version.h header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h)
-
-
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)

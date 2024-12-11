@@ -1,0 +1,14 @@
+[
+    {
+        "name": "tool-select",
+        "text": "&Selection",
+        "group": "tools",
+        "checked": true
+    },
+    {
+        "name": "tool-text",
+        "text": "&Text",
+        "group": "tools",
+        "checked": false
+    }
+]

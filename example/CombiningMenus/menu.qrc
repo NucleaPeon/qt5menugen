@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="toolbar">toolbar.json</file>
+        <file alias="common">common.json</file>
+    </qresource>
+</RCC>

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.3)
-project(ShortcutTester
+project(CombiningMenus
         VERSION 1.0.0
         LANGUAGES CXX
-        DESCRIPTION "Example MainWindow that shows how shortcuts are set / reset and using StandardKey enum")
+        DESCRIPTION "Example that shows how reusing a QtMenuGen* object can be done")
 
 find_package(Qt5 REQUIRED Widgets)
 find_package(qt5menugen CONFIG REQUIRED 2.1.1)
@@ -20,7 +20,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 list(APPEND OTHER_TARGETS
-	menu.json
+        toolbar.json
+        common.json
 )
 
 list(APPEND SHORTCUT_TESTER_HEADERS
@@ -44,7 +45,7 @@ if (APPLE)
 	list(APPEND SHORTCUT_TESTER_SOURCES cocoainitializer.mm)
 	add_custom_target(OTHER_FILES SOURCES ${OTHER_TARGETS})
 
-	add_executable(shortcutwindow MACOSX_BUNDLE
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE
 		${OTHER_FILES}
 		main.cpp
 		${SHORTCUT_TESTER_HEADERS}
@@ -52,7 +53,7 @@ if (APPLE)
 		${SHORTCUT_TESTER_UIS}
 		${SHORTCUT_TESTER_RES}
 	)
-	target_sources(shortcutwindow PRIVATE
+        target_sources(${PROJECT_NAME} PRIVATE
 		${OTHER_TARGETS}
 	)
 	set_source_files_properties(
@@ -60,16 +61,16 @@ if (APPLE)
 		PROPERTIES
 		MACOSX_PACKAGE_LOCATION Resources/
 	)
-	set_target_properties(shortcutwindow PROPERTIES
+        set_target_properties(${PROJECT_NAME} PROPERTIES
 		BUNDLE TRUE
-		MACOSX_BUNDLE_GUI_IDENTIFIER shortcutwindow
-		MACOSX_BUNDLE_BUNDLE_NAME ShortcutWindow
+                MACOSX_BUNDLE_GUI_IDENTIFIER ${PROJECT_NAME}
+                MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
 		MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
 		MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
 	)
 
 else()
-	add_executable(shortcutwindow
+        add_executable(${PROJECT_NAME}
 		${OTHER_FILES}
 		main.cpp
 		${SHORTCUT_TESTER_HEADERS}
@@ -79,17 +80,17 @@ else()
 	)
 endif()
 
-target_link_libraries(shortcutwindow Qt5::Widgets Qt5::Core)
-target_link_libraries(shortcutwindow qt5menugen)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core)
+target_link_libraries(${PROJECT_NAME} qt5menugen)
 if(APPLE)
-	set_target_properties(shortcutwindow PROPERTIES LINK_FLAGS
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
 		 "-Wl,-F/Library/Frameworks")
-	target_link_libraries(shortcutwindow stdc++
+        target_link_libraries(${PROJECT_NAME} stdc++
 		"-framework Cocoa"
 		objc
 	)
-	target_link_libraries(shortcutwindow Qt5::MacExtras)
+        target_link_libraries(${PROJECT_NAME} Qt5::MacExtras)
 elseif(MSVC)
-	target_link_libraries(shortcutwindow Qt5::WinExtras)
+        target_link_libraries(${PROJECT_NAME} Qt5::WinExtras)
 	QT5_WRAP_UI( UI_HEADERS ${QJSONIFY_UIS} )
 endif()

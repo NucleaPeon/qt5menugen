@@ -1,5 +1,7 @@
 #include "qt5menugen.h"
 
+#include <QtCore/QDebug>
+
 QtMenuGen::QtMenuGen(QString path)
 {
     this->action_map = QMap<QString, QAction*>();
@@ -64,6 +66,21 @@ const QJsonDocument QtMenuGen::jsonDocument()
     return this->jdoc;
 }
 
+const QMap<QString, QAction *> QtMenuGen::actions()
+{
+    return this->action_map;
+}
+
+const QMap<QString, QActionGroup *> QtMenuGen::actionGroups()
+{
+    return this->group_map;
+}
+
+const QMap<QString, QMenu *> QtMenuGen::menus()
+{
+    return this->menu_map;
+}
+
 void QtMenuGen::setup(QWidget *widget, QObject *slotobj)
 {
     mb = setupMenus(widget);
@@ -90,11 +107,328 @@ void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
 
 void QtMenuGen::setup(QMenu *menu, QObject *slotobj, QJsonObject obj)
 {
+    qDebug() << Q_FUNC_INFO;
     if (obj.isEmpty()) { obj = this->jsonDocument().object(); }
-    const QMetaObject *metaConn = slotobj->metaObject();
+    // const QMetaObject *metaConn = slotobj->metaObject();
 	menu = setupMenu(menu, slotobj, obj);
     menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
 }
+
+QMenu* QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, UpdateTypes type)
+{
+    // If it's not loaded, that usually implies a badly formatted json file.
+    if (! menugenobj->isLoaded()) {
+        qWarning("Cannot update() on a QtMenuGen* that hasn't been set up correctly.");
+        return NULL;
+    }
+
+    QJsonDocument doc = menugenobj->jsonDocument();
+    QMenu* menu;
+    if (doc.isArray()) {
+        qDebug() << "update() with QJsonArray()";
+        // It's something like a menu bar format with multi-menus
+
+    } else if (doc.isObject()) {
+        // It's a single menu we can add immediately. Must have actions[], otherwise we convert it
+        // to a single QAction.
+        const QJsonObject obj = doc.object();
+        if (! obj.contains("actions")) {
+            qDebug() << "no actions, so we turn this into an empty menu with generated name";
+            menu = new QMenu();
+            menu->setTitle(ptrToString(menu));
+            QList<QAction*> acts = QList<QAction*>();
+            acts.append(buildAction(obj, slotobj, menu));
+            menu->addActions(acts);
+            qDebug() << menu->title();
+        } else {
+            qDebug() << "We are building a menu";
+            menu = buildMenu(obj, slotobj);
+        }
+        menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
+        if (type == TOOLBAR) {
+            // Go through obj, find all action names, add them to tb.
+            qDebug() << "Adding menu " << menu << "to tool bar TODO";
+        } else if (type == MENUBAR) {
+            qDebug() << "Adding menu " << menu << "To menu bar" << mb;
+            this->mb->addMenu(menu);
+        } // If MENU, simply return the menu.
+    }
+    return menu;
+}
+
+QMenu *QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, QString append, QtMenuGen::UpdateTypes type, QtMenuGen::Injection inj)
+{
+    return new QMenu();
+}
+
+
+QAction *QtMenuGen::actionByName(const QString name)
+{
+    return action_map.value(name.toLower().replace("&", ""), NULL);
+}
+
+QMenu *QtMenuGen::menuByName(const QString name)
+{
+    return menu_map.value(name.toLower().replace("&", ""), NULL);
+}
+
+bool QtMenuGen::isLoaded()
+{
+    return this->loaded;
+}
+
+const QMap<QString, int> QtMenuGen::getShortcuts()
+{
+    return this->shortcuts;
+}
+
+QMenu* QtMenuGen::setupMenu(QObject *slotobj, QJsonObject obj)
+{
+    QMenu* m = new QMenu();
+    return setupMenu(m, slotobj, obj);
+}
+
+QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
+{
+    // setupMenu isn't a proper name for creating menus, so simply call the buildMenu() method.
+    return buildMenu(obj, slotobj, m);
+}
+
+QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
+{
+    QMenuBar *mb = new QMenuBar(widget);
+    QJsonArray arr = jdoc.array();
+    foreach(QJsonValue val, arr) {
+        QJsonObject obj = val.toObject();
+        QMenu *m = setupMenu(widget, obj);
+        menu_map[obj.value("name").toString("").toLower().replace("&", "")] = m;
+        mb->addMenu(m);
+    }
+    return mb;
+}
+#if defined(Q_OS_LINUX) || defined(Q_OS_WIN)
+QToolBar* QtMenuGen::setupToolBar(QWidget *widget, QObject *slotobj)
+{
+    QJsonArray arr = jdoc.array();
+    QToolBar *tb = new QToolBar(widget);
+
+    foreach(QJsonValue val, arr) {
+        // QActions already set up and configured
+        QJsonObject obj = val.toObject();
+        foreach(QJsonValue actval, obj.value("actions").toArray()) {
+            QJsonObject actobj = actval.toObject();
+            bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
+            if (actobj.contains("separator") && ! toolbar_hidden) {
+                tb->addSeparator();
+                continue;
+            }
+            if (! isValid(actobj)) { continue; }
+            const QString name = actobj.value("name").toString();
+            QAction *act = action_map.value(name.toLower(), NULL);
+            if (act != NULL) {
+                // Just don't add. As long as OS X is working, or until we impl our own toolbar visibility ui widget,
+                // they can use the menus.
+                if (toolbar_hidden) { continue; }
+                tb->addAction(act);
+            }
+
+        }
+    }
+    return tb;
+}
+#endif
+
+#ifdef Q_OS_MAC
+QMacToolBar* QtMenuGen::setupOSXToolBar(QWidget *widget, QObject *slotobj)
+{
+    QJsonArray arr = jdoc.array();
+    QMacToolBar *tb = new QMacToolBar();
+    foreach(QJsonValue val, arr) {
+        QJsonObject obj = val.toObject();
+        foreach(QJsonValue actval, obj.value("actions").toArray()) {
+            QJsonObject actobj = actval.toObject();
+            // Allow hiding of separators on toolbars (but not menus), set toolbar_hidden.
+            bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
+            if (actobj.contains("separator") && ! toolbar_hidden) {
+                tb->addSeparator();
+                continue;
+            }
+            if (! isValid(actobj)) { continue; }
+            const bool enabled = actobj.value("enabled").toBool(true);
+            QIcon icon = QIcon(actobj.value("icon").toString());
+            // FIXME: enabled currently doesn't work on QMacToolBarItem
+            const QString name = actobj.value("text").toString().remove('&');
+
+            QMacToolBarItem *tbitem;
+            if (toolbar_hidden) {
+                tbitem = tb->addAllowedItem(icon, name);
+            } else {
+                tbitem = tb->addItem(icon, name);
+            }
+            QString slot = actobj.value("slot").toString();
+            if (! slot.isEmpty()) {
+                handleSignalSlot(tbitem, "activated()", slotobj, slot.toLocal8Bit().data());
+            }
+        }
+    }
+    tb->attachToWindow(widget->windowHandle());
+    return tb;
+}
+
+QMacToolBarItem *QtMenuGen::toolBarItemByText(QString text)
+{
+    const QString name = text.remove('&');
+    foreach(QMacToolBarItem* item, tb->items()) {
+        if (item->text() == name)
+            return item;
+    }
+    return NULL;
+}
+
+#endif
+
+void QtMenuGen::handleSignalSlot(QObject *connector, const char *signal, QObject *caller, const char *slot)
+{
+    const QMetaObject *metaConn = connector->metaObject();
+    int sigIdx = metaConn->indexOfSignal(signal);
+    if (sigIdx < 0) { warn(QString("qt5menugen: %1: %2").arg("signal method not found").arg(signal)); return; }
+    const QMetaMethod sigMethod = metaConn->method(sigIdx);
+
+    const QMetaObject *metaCall = caller->metaObject();
+    int slotIdx = metaCall->indexOfSlot(slot);
+    if (slotIdx < 0) { warn(QString("qt5menugen: %1: %2 on %3").arg("slot method not found").arg(slot).arg(metaCall->className())); return; }
+    const QMetaMethod slotMethod = metaCall->method(slotIdx);
+
+    QObject::connect(connector, sigMethod, caller, slotMethod);
+}
+
+bool QtMenuGen::isValid(const QJsonObject obj)
+{
+    return (obj.contains("name") && (
+            ! obj.value("icon").toString().isEmpty() ||
+                ! obj.value("text").toString().isEmpty() ||
+                	obj.contains("actions")) );
+}
+
+void QtMenuGen::warn(QString message)
+{
+    qWarning(message.toStdString().c_str());
+}
+
+QAction *QtMenuGen::buildAction(QJsonObject obj, QObject *slotobj, QMenu* menu)
+{
+    const bool has_checked = obj.contains("checked");
+    const bool has_group = obj.contains("group");
+
+    const QIcon icon = QIcon(obj.value("icon").toString(""));
+    QAction* act = new QAction(icon, obj.value("text").toString(""), menu->parent());
+    act->setData(QVariant(obj.value("name").toString()));
+    if (has_checked) {
+        act->setCheckable(true);
+        act->setChecked(obj.value("checked").toBool());
+        if (has_group) {
+            QActionGroup* group;
+            const QString groupname = obj.value("group").toString();
+            if (group_map.contains(groupname)) {
+                group = group_map.value(groupname);
+            } else {
+                group = new QActionGroup(0);
+                group_map[groupname] = group;
+            }
+            group->addAction(act);
+        }
+    }
+    // Assign shortcut
+    const QString sc = QObject::tr(obj.value("shortcut").toString().toLatin1().data());
+    if (! sc.isNull() && ! sc.isEmpty()) {
+        if (sc.contains("Qt::") || sc.contains("QKeySequence::")) {
+            if (sc.contains("Qt::")) {
+                qWarning("Qt:: enum detected for key, but this is not yet supported");
+            }
+            // Split by +, use entire string (____::____) as key for int value, then use it to generate the QKeySequence.
+            QStringList lst = sc.split("+");
+            QKeySequence seq;
+            switch(lst.size()) {
+            case 1:
+                if (shortcuts.contains(lst.at(0)))
+                    seq = QKeySequence((QKeySequence::StandardKey) shortcuts.value(lst.at(0)));
+
+                break;
+            case 2:
+                if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1)))
+                    seq = QKeySequence((int) shortcuts.value(lst.at(0)),
+                                    (int) shortcuts.value(lst.at(1)));
+
+                break;
+            case 3:
+                if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
+                        && shortcuts.contains(lst.at(2)))
+                    seq = QKeySequence((int) shortcuts.value(lst.at(0)),
+                                    (int) shortcuts.value(lst.at(1)),
+                                    (int) shortcuts.value(lst.at(2)));
+
+                break;
+            case 4:
+                if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
+                        && shortcuts.contains(lst.at(2)) && shortcuts.contains(lst.at(3)))
+                    seq = QKeySequence((int) shortcuts.value(lst.at(0)),
+                                    (int) shortcuts.value(lst.at(1)),
+                                    (int) shortcuts.value(lst.at(2)),
+                                    (int) shortcuts.value(lst.at(3)));
+
+                break;
+            default:
+                break;
+            }
+            act->setShortcut(seq);
+        } else {
+            act->setShortcut(QKeySequence::fromString(sc));
+        }
+    }
+    act->setEnabled(obj.value("enabled").toBool(true));
+    QString slot = obj.value("slot").toString();
+    if (! slot.isEmpty()) {
+        handleSignalSlot(act, "triggered()", slotobj, slot.toLocal8Bit().data());
+    }
+    action_map[obj.value("name").toString().toLower().replace("&", "")] = act;
+    return act;
+}
+
+QMenu *QtMenuGen::buildMenu(QJsonObject obj, QObject *slotobj, QMenu* menu)
+{
+    if (obj.isEmpty()) {
+        obj = this->jsonDocument().object();
+    }
+    menu->setTitle(obj.value("name").toString(""));
+    QJsonArray arr = obj.value("actions").toArray();
+    foreach(QJsonValue actval, arr) {
+        QJsonObject actobj = actval.toObject();
+        if (actobj.contains("separator")) {
+            menu->addSeparator();
+            continue;
+        }
+        if (! isValid(actobj)) { continue; }
+
+        if (actobj.contains("actions")) {
+            QMenu *submenu = new QMenu();
+            submenu = buildMenu(actobj, slotobj, submenu);
+            menu->addMenu(submenu);
+            continue;
+        }
+        // This builds out the entire QAction with shortcuts, slots, everything etc.
+        menu->addAction(buildAction(actobj, slotobj, menu));
+    }
+    menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
+    return menu;
+}
+
+const QString QtMenuGen::ptrToString(const QMenu *menu)
+{
+    // Found at https://stackoverflow.com/questions/8881923/how-to-convert-a-pointer-value-to-qstring
+    return QString( "0x%1" ).arg( reinterpret_cast<quintptr>(menu),
+                                  QT_POINTER_SIZE * 2, 16, QChar('0') );
+}
+
 
 QMap<QString, int> QtMenuGen::load_shortcuts()
 {
@@ -669,253 +1003,4 @@ QMap<QString, int> QtMenuGen::load_shortcuts()
     shortcuts["QKeySequence::ZoomOut"]	= 17; //	Zoom out.
     shortcuts["QKeySequence::FullScreen"]	= 66; //	Toggle the window state to/from full screen.
     return shortcuts;
-}
-
-
-QAction *QtMenuGen::actionByName(const QString name)
-{
-    return action_map.value(name.toLower().replace("&", ""), NULL);
-}
-
-QMenu *QtMenuGen::menuByName(const QString name)
-{
-    return menu_map.value(name.toLower().replace("&", ""), NULL);
-}
-
-bool QtMenuGen::isLoaded()
-{
-    return this->loaded;
-}
-
-const QMap<QString, int> QtMenuGen::getShortcuts()
-{
-    return this->shortcuts;
-}
-
-QMenu* QtMenuGen::setupMenu(QObject *slotobj, QJsonObject obj)
-{
-    QMenu* m = new QMenu();
-    return setupMenu(m, slotobj, obj);
-}
-
-QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
-{
-    if (obj.isEmpty()) {
-        obj = this->jsonDocument().object();
-    }
-	m->setTitle(obj.value("name").toString(""));
-	QJsonArray arr = obj.value("actions").toArray();
-    foreach(QJsonValue actval, arr) {
-        QJsonObject actobj = actval.toObject();
-        if (actobj.contains("separator")) {
-            m->addSeparator();
-            continue;
-        }
-		if (! isValid(actobj)) { continue; }
-		const bool has_checked = actobj.contains("checked");
-		const bool has_group = actobj.contains("group");
-		const QString name = actobj.value("name").toString();
-		const QIcon icon = QIcon(actobj.value("icon").toString());
-		if (actobj.contains("actions")) {
-			QMenu *submenu = new QMenu();
-			submenu = setupMenu(submenu, slotobj, actobj);
-			m->addMenu(submenu);
-			continue;
-		}
-
-		QAction *act = new QAction(icon, actobj.value("text").toString(), m->parent());
-		act->setData(QVariant(name));
-
-		if (has_checked) {
-			act->setCheckable(true);
-			act->setChecked(actobj.value("checked").toBool());
-			if (has_group) {
-				QActionGroup* group;
-				const QString groupname = actobj.value("group").toString();
-				if (group_map.contains(groupname)) {
-					group = group_map.value(groupname);
-				} else {
-					group = new QActionGroup(0);
-					group_map[groupname] = group;
-				}
-				group->addAction(act);
-			}
-		}
-		const QString sc = QObject::tr(actobj.value("shortcut").toString().toLatin1().data());
-		if (! sc.isNull() && ! sc.isEmpty()) {
-			if (sc.contains("Qt::") || sc.contains("QKeySequence::")) {
-				if (sc.contains("Qt::")) {
-					qWarning("Qt:: enum detected for key, but this is not yet supported");
-				}
-				// Split by +, use entire string (____::____) as key for int value, then use it to generate the QKeySequence.
-				QStringList lst = sc.split("+");
-				QKeySequence seq;
-				switch(lst.size()) {
-				case 1:
-					if (shortcuts.contains(lst.at(0)))
-						seq = QKeySequence((QKeySequence::StandardKey) shortcuts.value(lst.at(0)));
-
-					break;
-				case 2:
-					if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1)))
-						seq = QKeySequence((int) shortcuts.value(lst.at(0)),
-										(int) shortcuts.value(lst.at(1)));
-
-					break;
-				case 3:
-					if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
-							&& shortcuts.contains(lst.at(2)))
-						seq = QKeySequence((int) shortcuts.value(lst.at(0)),
-										(int) shortcuts.value(lst.at(1)),
-										(int) shortcuts.value(lst.at(2)));
-
-					break;
-				case 4:
-					if (shortcuts.contains(lst.at(0)) && shortcuts.contains(lst.at(1))
-							&& shortcuts.contains(lst.at(2)) && shortcuts.contains(lst.at(3)))
-						seq = QKeySequence((int) shortcuts.value(lst.at(0)),
-										(int) shortcuts.value(lst.at(1)),
-										(int) shortcuts.value(lst.at(2)),
-										(int) shortcuts.value(lst.at(3)));
-
-					break;
-				default:
-					break;
-				}
-				act->setShortcut(seq);
-			} else {
-				act->setShortcut(QKeySequence::fromString(sc));
-			}
-		}
-		act->setEnabled(actobj.value("enabled").toBool(true));
-		m->addAction(act);
-		QString slot = actobj.value("slot").toString();
-		if (! slot.isEmpty()) {
-			handleSignalSlot(act, "triggered()", slotobj, slot.toLocal8Bit().data());
-		}
-		action_map[actobj.value("name").toString().toLower().replace("&", "")] = act;
-	}
-	return m;
-}
-
-QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
-{
-    QMenuBar *mb = new QMenuBar(widget);
-    QJsonArray arr = jdoc.array();
-    foreach(QJsonValue val, arr) {
-        QJsonObject obj = val.toObject();
-        QMenu *m = setupMenu(widget, obj);
-        menu_map[obj.value("name").toString("").toLower().replace("&", "")] = m;
-        mb->addMenu(m);
-    }
-    return mb;
-}
-#if defined(Q_OS_LINUX) || defined(Q_OS_WIN)
-QToolBar* QtMenuGen::setupToolBar(QWidget *widget, QObject *slotobj)
-{
-    QJsonArray arr = jdoc.array();
-    QToolBar *tb = new QToolBar(widget);
-
-    foreach(QJsonValue val, arr) {
-        // QActions already set up and configured
-        QJsonObject obj = val.toObject();
-        foreach(QJsonValue actval, obj.value("actions").toArray()) {
-            QJsonObject actobj = actval.toObject();
-            bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
-            if (actobj.contains("separator") && ! toolbar_hidden) {
-                tb->addSeparator();
-                continue;
-            }
-            if (! isValid(actobj)) { continue; }
-            const QString name = actobj.value("name").toString();
-            QAction *act = action_map.value(name.toLower(), NULL);
-            if (act != NULL) {
-                // Just don't add. As long as OS X is working, or until we impl our own toolbar visibility ui widget,
-                // they can use the menus.
-                if (toolbar_hidden) { continue; }
-                tb->addAction(act);
-            }
-
-        }
-    }
-    return tb;
-}
-#endif
-
-#ifdef Q_OS_MAC
-QMacToolBar* QtMenuGen::setupOSXToolBar(QWidget *widget, QObject *slotobj)
-{
-    QJsonArray arr = jdoc.array();
-    QMacToolBar *tb = new QMacToolBar();
-    foreach(QJsonValue val, arr) {
-        QJsonObject obj = val.toObject();
-        foreach(QJsonValue actval, obj.value("actions").toArray()) {
-            QJsonObject actobj = actval.toObject();
-            // Allow hiding of separators on toolbars (but not menus), set toolbar_hidden.
-            bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
-            if (actobj.contains("separator") && ! toolbar_hidden) {
-                tb->addSeparator();
-                continue;
-            }
-            if (! isValid(actobj)) { continue; }
-            const bool enabled = actobj.value("enabled").toBool(true);
-            QIcon icon = QIcon(actobj.value("icon").toString());
-            // FIXME: enabled currently doesn't work on QMacToolBarItem
-            const QString name = actobj.value("text").toString().remove('&');
-
-            QMacToolBarItem *tbitem;
-            if (toolbar_hidden) {
-                tbitem = tb->addAllowedItem(icon, name);
-            } else {
-                tbitem = tb->addItem(icon, name);
-            }
-            QString slot = actobj.value("slot").toString();
-            if (! slot.isEmpty()) {
-                handleSignalSlot(tbitem, "activated()", slotobj, slot.toLocal8Bit().data());
-            }
-        }
-    }
-    tb->attachToWindow(widget->windowHandle());
-    return tb;
-}
-
-QMacToolBarItem *QtMenuGen::toolBarItemByText(QString text)
-{
-    const QString name = text.remove('&');
-    foreach(QMacToolBarItem* item, tb->items()) {
-        if (item->text() == name)
-            return item;
-    }
-    return NULL;
-}
-
-#endif
-
-void QtMenuGen::handleSignalSlot(QObject *connector, const char *signal, QObject *caller, const char *slot)
-{
-    const QMetaObject *metaConn = connector->metaObject();
-    int sigIdx = metaConn->indexOfSignal(signal);
-    if (sigIdx < 0) { warn(QString("qt5menugen: %1: %2").arg("signal method not found").arg(signal)); return; }
-    const QMetaMethod sigMethod = metaConn->method(sigIdx);
-
-    const QMetaObject *metaCall = caller->metaObject();
-    int slotIdx = metaCall->indexOfSlot(slot);
-    if (slotIdx < 0) { warn(QString("qt5menugen: %1: %2 on %3").arg("slot method not found").arg(slot).arg(metaCall->className())); return; }
-    const QMetaMethod slotMethod = metaCall->method(slotIdx);
-
-    QObject::connect(connector, sigMethod, caller, slotMethod);
-}
-
-bool QtMenuGen::isValid(const QJsonObject obj)
-{
-    return (obj.contains("name") && (
-            ! obj.value("icon").toString().isEmpty() ||
-                ! obj.value("text").toString().isEmpty() ||
-                	obj.contains("actions")) );
-}
-
-void QtMenuGen::warn(QString message)
-{
-    qWarning(message.toStdString().c_str());
-
 }

@@ -1,14 +1,10 @@
-[
-    {
-        "name": "tool-select",
-        "text": "&Selection",
-        "group": "tools",
-        "checked": true
-    },
-    {
-        "name": "tool-text",
-        "text": "&Text",
-        "group": "tools",
-        "checked": false
-    }
-]
+{
+    "name": "common1",
+    "actions": [
+        {
+            "name": "new-presentation",
+            "text": "New &Presentation",
+            "shortcut": "Ctrl+Shift+N"
+        }
+    ]
+}

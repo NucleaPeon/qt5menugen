@@ -3,31 +3,31 @@
 
 #include "qt5menugen_global.h"
 
-#include <QMainWindow>
-#include <QMetaMethod>
-#include <QWidget>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QJsonParseError>
+#include <QtWidgets/QMainWindow>
+#include <QtCore/QMetaMethod>
+#include <QtWidgets/QWidget>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
+#include <QtCore/QJsonValue>
+#include <QtCore/QJsonParseError>
 #include <QFile>
 #include <QUrl>
-#include <QMenuBar>
-#include <QMenu>
-#include <QAction>
-#include <QActionGroup>
-#include <QMap>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QActionGroup>
+#include <QtCore/QMap>
 
 #ifdef Q_OS_MAC
-#include <QMacToolBar>
-#include <QMacToolBarItem>
+#include <QtMacExtras/QMacToolBar>
+#include <QtMacExtras/QMacToolBarItem>
 #endif
 
 #ifdef Q_OS_LINUX
-#include <QToolBar>
+#include <QtWidgets/QToolBar>
 #elif Q_OS_WIN
-#include <QToolBar>
+#include <QtWidgets/QToolBar>
 #endif
 
 /*!
@@ -60,7 +60,8 @@
 
 class QT5MENUGENSHARED_EXPORT QtMenuGen
 {
-
+    Q_ENUMS(UpdateTypes)
+    Q_ENUMS(Injection)
 public:
     /*!
      * \brief QtMenuGen Object based on a QString path
@@ -79,6 +80,24 @@ public:
      */
     QtMenuGen(QUrl path);
     ~QtMenuGen();
+
+
+    /*!
+     *  brief The UpdateTypes enum specifies whether to *additionally* allow \sa update() to add to various areas where menus are created
+     *
+     * \version 2.3.0
+     */
+    enum UpdateTypes { MENU, MENUBAR, TOOLBAR };
+    /*!
+     * \brief The Injection enum determines where the update() will occur if given a menu name
+     *
+     * For example, if you have a toolbar and you have a common set of menus and actions, you can
+     * specify qtmenugen to add the resulting update as a submenu of the menu/action, before or after
+     * the name, or if DEFAULT it will put it at the end.
+     *
+     * \version 2.3.0
+     */
+    enum Injection { DEFAULT, INSERT_AFTER, INSERT_BEFORE, SUBMENU };
 
     /*!
      * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required.
@@ -171,6 +190,27 @@ public:
      *
      */
     void setup(QMenu *menu, QObject *slotobj, QJsonObject obj = QJsonObject());
+
+    /*!
+     * \brief update will combine another \c QtMenuGen* object with this one
+     * \param menugenobj QtMenuGen* object to copy and append
+     * \param UpdateTypes will add the QtMenuGen object contents to the toolbar and/or menubar if specified.
+     *
+     * There may be scenarios where the user wants to have menus that appear in both the toolbar and in
+     * other places, such as a list of tools in a drawing or editing program. By calling update() on
+     * a \c QtMenuGen* object, we can create a copy of the containing menus and actions so the developer doesn't
+     * have to manually do this.
+     *
+     * Menu updates should be reflected immediately.
+     *
+     * \returns QMenu* of the newly formed QMenu object
+     *
+     * \version 2.3.0
+     */
+    QMenu *update(QtMenuGen* menugenobj, QObject *slotobj, UpdateTypes type = MENU);
+
+    QMenu* update(QtMenuGen* menugenobj, QObject *slotobj, QString append, UpdateTypes type = MENU, Injection inj = DEFAULT);
+
     /*!
      * \brief actionByName Return the QAction* object based on the name assigned to it in the json file
      *
@@ -213,17 +253,29 @@ public:
 	 */
     const QJsonDocument jsonDocument();
 
+    /*!
+     * \brief actions returns the QMap of QActions
+     * \return \c QMap<QString, QAction*>
+     *
+     * \version 2.3.0
+     */
+    const QMap<QString, QAction*> actions();
+    /*!
+     * \brief actionGroups returns the QMap of QActionGroups
+     * \return \c QMap<QString, QActionGroup*>
+     *
+     * \version 2.3.0
+     */
+    const QMap<QString, QActionGroup*> actionGroups();
+    /*!
+     * \brief menus returns the QMap of QMenus
+     * \return \c QMap<QString, QMenu*>
+     *
+     * \version 2.3.0
+     */
+    const QMap<QString, QMenu*> menus();
 
 private:
-    bool loaded;
-    bool configured;
-    QMap<QString, int> shortcuts;
-    QJsonDocument jdoc;
-    QMap<QString, QAction*> action_map;
-    QMap<QString, QActionGroup*> group_map;
-    QMap<QString, QMenu*> menu_map;
-    QMenuBar* mb;
-
 	/*!
      * \brief Internal method to setup a single menu
      *
@@ -263,15 +315,62 @@ private:
     bool isValid(const QJsonObject obj);
 
     /*!
-     * \brief warn Convenience method to produce qWarnings() with QString parameter
-     *
-     * This helps build strings to add in parameters with .arg()
-     *
+     * \brief warn Convenience method to produce qWarnings() with QString % arg parameters
      * \param message to send to qWarning()
+     *
+     * This helps build strings with parameters for easier qWarning calls.
+     *
+     * \code{.cpp}
+     *     warn(QString("This has %1 and %2 in it").arg("foo").arg("bar"));
+     * \endcode
+     *
      *
      * \version 2.1.1
      */
     void warn(QString message);
+
+    /*!
+     * \brief buildAction moved QAction* building code into this one method to compartmentalize it
+     * \param obj
+     * \param slotobj
+     * \return QAction*
+     *
+     * \version 2.3.0
+     */
+    QAction *buildAction(QJsonObject obj, QObject* slotobj, QMenu* menu);
+
+    /*!
+     * \brief buildMenu moved QMenu* building code into this one method to compartmentalize it
+     * \param obj
+     * \param slotobj
+     * \param menu a default empty menu. If you pass in an existing QMenu, its title will be overwritten,
+     *        menus, separators and actions will be added to it on top of what might already exist.
+     * \return QMenu*
+     *
+     * \version 2.3.0
+     */
+    QMenu *buildMenu(QJsonObject obj, QObject* slotobj, QMenu *menu = new QMenu());
+
+    /*!
+     * \brief ptrToString produces a unique name (memory address location) as a string for cases when a name is not provided
+     * \param menu
+     *
+     * When we create menus by using update(), there may be cases where menus do not have names.
+     * In this case, we set the name to a string memory address location so in any case it's possible
+     * to retrieve the menu using its name.
+     *
+     * \return QString
+     */
+    const QString ptrToString(const QMenu *menu);
+
+    bool loaded;
+    bool configured;
+    QMap<QString, int> shortcuts;
+    QJsonDocument jdoc;
+    QMap<QString, QAction*> action_map;
+    QMap<QString, QActionGroup*> group_map;
+    QMap<QString, QMenu*> menu_map;
+    QMenuBar* mb;
 
 #ifdef Q_OS_MAC
     QMacToolBar *tb;
@@ -282,6 +381,7 @@ private:
     QAction* toolBarItemByText(QString text);
     QToolBar* setupToolBar(QWidget *widget, QObject *slotobj);
 #endif
+
 };
 
 #endif // QTMENUGEN_H

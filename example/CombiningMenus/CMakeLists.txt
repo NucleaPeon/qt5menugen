@@ -5,7 +5,7 @@ project(CombiningMenus
         DESCRIPTION "Example that shows how reusing a QtMenuGen* object can be done")
 
 find_package(Qt5 REQUIRED Widgets)
-find_package(qt5menugen CONFIG REQUIRED 2.1.1)
+find_package(qt5menugen CONFIG REQUIRED 2.3.0)
 
 if(APPLE)
 	find_package(Qt5 REQUIRED MacExtras)

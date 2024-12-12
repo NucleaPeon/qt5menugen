@@ -1,7 +1,10 @@
 #include "qt5menugen.h"
 
+#include <QDebug>
+
 QtMenuGen::QtMenuGen(QString path)
 {
+    qDebug() << Q_FUNC_INFO;
     this->action_map = QMap<QString, QAction*>();
     this->group_map = QMap<QString, QActionGroup*>();
     this->menu_map = QMap<QString, QMenu*>();
@@ -29,6 +32,7 @@ QtMenuGen::~QtMenuGen()
 
 bool QtMenuGen::loadFile(QString path)
 {
+    qDebug() << Q_FUNC_INFO;
     QFile def(path);
     if (def.exists()) {
         if (def.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -81,30 +85,35 @@ const QMap<QString, QMenu *> QtMenuGen::menus()
 
 void QtMenuGen::setup(QWidget *widget, QObject *slotobj)
 {
+    qDebug() << Q_FUNC_INFO;
     mb = setupMenus(widget);
+    qDebug() << "initializing tb TOOlbar";
 #ifdef Q_OS_MAC
     tb = setupOSXToolBar(widget, slotobj);
-#endif
-#ifdef Q_OS_LINUX
+#else
     tb = setupToolBar(widget, slotobj);
 #endif
+    qDebug() << "POST TOOLBAR SETUP";
 }
 
 void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
 {
+    qDebug() << Q_FUNC_INFO;
     mb = setupMenus(window);
     window->setMenuBar(mb);
+    qDebug() << "initializing tb TOOlbar";
 #ifdef Q_OS_MAC
     tb = setupOSXToolBar(window, slotobj);
-#endif
-#ifdef Q_OS_LINUX
+#else
     tb = setupToolBar(window, slotobj);
     window->addToolBar(tb);
 #endif
+    qDebug() << "POST TOOLBAR SETUP";
 }
 
 void QtMenuGen::setup(QMenu *menu, QObject *slotobj, QJsonObject obj)
 {
+    qDebug() << Q_FUNC_INFO;
     if (obj.isEmpty()) { obj = this->jsonDocument().object(); }
     // const QMetaObject *metaConn = slotobj->metaObject();
 	menu = setupMenu(menu, slotobj, obj);
@@ -147,8 +156,7 @@ QMenu* QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, UpdateTypes ty
                 foreach(QJsonValue val, arr) {
 #ifdef Q_OS_MAC
                     updateToolBar(this->tb, val, slotobj);
-#endif
-#ifdef Q_OS_LINUX
+#else
                     updateToolBar(this->tb, val, slotobj);
 #endif
                 }
@@ -202,6 +210,7 @@ QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
 
 QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
 {
+    qDebug() << Q_FUNC_INFO;
     QMenuBar *mb = new QMenuBar(widget);
     QJsonArray arr = jdoc.array();
     foreach(QJsonValue val, arr) {
@@ -217,31 +226,39 @@ QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
 
 void QtMenuGen::updateToolBar(QToolBar *toolbar, QJsonValue val, QObject *slotobj, QString name, InjectionTypes type)
 {
+    qDebug() << Q_FUNC_INFO;
     QJsonObject actobj = val.toObject();
     bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
     if (actobj.contains("separator") && ! toolbar_hidden) {
-        tb->addSeparator();
+        toolbar->addSeparator();
         return;
     }
     if (! isValid(actobj)) { return; }
     const QString _name = actobj.value("name").toString();
     QAction *act = action_map.value(_name.toLower(), NULL);
+    qDebug() << "linux updateToolBar" << act << _name;
     if (act != NULL) {
         // Just don't add. As long as OS X is working, or until we impl our own toolbar visibility ui widget,
         // they can use the menus.
         if (toolbar_hidden) { return; }
-        tb->addAction(act);
+        qDebug() << "adding action";
+        toolbar->addAction(act);
     }
+    qDebug() << "DONE toolbar update";
 }
 
 QToolBar* QtMenuGen::setupToolBar(QWidget *widget, QObject *slotobj)
 {
+    qDebug() << Q_FUNC_INFO;
     QJsonArray arr = jdoc.array();
     QToolBar *tb = new QToolBar(widget);
+    qDebug() << "tb" << tb;
     foreach(QJsonValue val, arr) {
+        qDebug() << val << "val";
         // QActions already set up and configured
         QJsonObject obj = val.toObject();
         foreach(QJsonValue actval, obj.value("actions").toArray()) {
+            qDebug() << "actval" << actval;
             updateToolBar(tb, actval, slotobj);
         }
     }

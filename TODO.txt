@@ -1,0 +1,6 @@
+TODO: For important things, add them to the github issues page.
+
+[ ] Finish update() where user can choose which menu or action to append to
+[ ] Update does not respect toolbar additions.
+
+[ ] Ensure that when json is defined, whether it's an object {} of a single menu or an [] array of multiple actions, it gets added correctly. I'm finding I'm only able to add {} objects. At least add this to example.

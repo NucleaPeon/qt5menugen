@@ -217,7 +217,7 @@ QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
 
 void QtMenuGen::updateToolBar(QToolBar *toolbar, QJsonValue val, QObject *slotobj, QString name, InjectionTypes type)
 {
-    QJsonObject actobj = actval.toObject();
+    QJsonObject actobj = val.toObject();
     bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
     if (actobj.contains("separator") && ! toolbar_hidden) {
         tb->addSeparator();

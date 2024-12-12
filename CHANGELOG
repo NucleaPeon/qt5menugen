@@ -12,6 +12,7 @@ Version 2.3.0
   * I have not tested this on windows/linux yet, only OS X 10.6.8.
   * Another pitfall is if you update with an UpdateTypes enum value of MENU, the library expects you
     to take the returned QMenu* and deal with it yourself; it does not automatically add it anywhere.
+  * the secondary update() with InjectionType enum does not work yet.
 
 Version 2.2.0
 =============

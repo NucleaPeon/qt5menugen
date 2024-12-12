@@ -188,17 +188,16 @@ An empty submenu simply requires an empty ``actions`` array; there may be cases 
 You can reuse qt5menugen objects using the ``update()`` method in version 2.3.0:
 
 ```
-    this->toolbar = new QtMenuGen(":/toolbar");
-    this->rightclickmenu = new QtMenuGen(":/rightclick");
-    this->common = new QtMenuGen(":/common");
+    this->main = new QtMenuGen(":/toolbar");
+    this->common = new QtMenuGen(":/common"); // Use this in multiple places
 
-    this->toolbar->setup(this, this);
-    this->toolbar->update(this->common);
-
-    QMenu *contextMenu = new QMenu();
-    this->rightclickmenu->setup(contextMenu, this);
-    this->rightclickmenu->update(this->common);
+    this->main->setup(this, this);
+    this->main->update(this->common, this, QtMenuGen::MENUBAR);
+    this->main->update(this->common, this, QtMenuGen::TOOLBAR);
 ```
+
+Note: Using update() with the toolbar doesn't necessarily mean they will be visible; you may have to
+update the toolbar with the newly added content. See the CombiningMenus example for more information.
 
 
 **Building Documentation:**

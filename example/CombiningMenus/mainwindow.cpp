@@ -6,10 +6,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->toolbar = new QtMenuGen(":/toolbar");
+    this->main = new QtMenuGen(":/toolbar");
     this->common = new QtMenuGen(":/common");
-    this->toolbar->setup(this, this);
-    this->toolbar->update(this->common, this, QtMenuGen::MENUBAR);
+    this->main->setup(this, this);
+    this->main->update(this->common, this, QtMenuGen::MENUBAR);
+    this->main->update(this->common, this, QtMenuGen::TOOLBAR);
 }
 
 MainWindow::~MainWindow()

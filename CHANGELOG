@@ -1,0 +1,19 @@
+Version 2.3.0
+=============
+
+* Allow users to reuse json-defined QtMenuGen* objects within other QtMenuGen* objects.
+* This release, while a minor version / feature increment, is considered a bit unstable as
+  it modifies a good portion of the base code. Some things are not yet working.
+    * I plan to include taking the json contents and adding it to an existing menu or action, but
+      currently it only updates to the end of the existing menus.
+      For example, If you have some menus you want added to the menu bar, they get added after
+      everything else. If you have: [ File | Edit | Help ], then adding [ Tools ] would go to the
+      end and be seen like: [ File | Edit | Help | Tools ], which may not be desirable.
+  * I have not tested this on windows/linux yet, only OS X 10.6.8.
+  * Another pitfall is if you update with an UpdateTypes enum value of MENU, the library expects you
+    to take the returned QMenu* and deal with it yourself; it does not automatically add it anywhere.
+
+Version 2.2.0
+=============
+
+* Added the ability to add submenus (even empty ones) by including the actions[] array in a json object

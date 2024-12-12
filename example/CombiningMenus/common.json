@@ -2,9 +2,14 @@
     "name": "common1",
     "actions": [
         {
-            "name": "new-presentation",
-            "text": "New &Presentation",
-            "shortcut": "Ctrl+Shift+N"
+            "name": "test-1",
+            "text": "Test 1",
+            "shortcut": "Ctrl+1"
+        },
+        {
+            "name": "test-2",
+            "text": "Test 2",
+            "shortcut": "Ctrl+2"
         }
     ]
 }

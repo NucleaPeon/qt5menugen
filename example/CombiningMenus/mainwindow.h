@@ -19,7 +19,7 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    QtMenuGen *toolbar;
+    QtMenuGen *main;
     QtMenuGen *common;
 };
 

@@ -1,7 +1,5 @@
 #include "qt5menugen.h"
 
-#include <QtCore/QDebug>
-
 QtMenuGen::QtMenuGen(QString path)
 {
     this->action_map = QMap<QString, QAction*>();
@@ -107,7 +105,6 @@ void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
 
 void QtMenuGen::setup(QMenu *menu, QObject *slotobj, QJsonObject obj)
 {
-    qDebug() << Q_FUNC_INFO;
     if (obj.isEmpty()) { obj = this->jsonDocument().object(); }
     // const QMetaObject *metaConn = slotobj->metaObject();
 	menu = setupMenu(menu, slotobj, obj);
@@ -125,38 +122,47 @@ QMenu* QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, UpdateTypes ty
     QJsonDocument doc = menugenobj->jsonDocument();
     QMenu* menu;
     if (doc.isArray()) {
-        qDebug() << "update() with QJsonArray()";
         // It's something like a menu bar format with multi-menus
 
     } else if (doc.isObject()) {
         // It's a single menu we can add immediately. Must have actions[], otherwise we convert it
         // to a single QAction.
         const QJsonObject obj = doc.object();
-        if (! obj.contains("actions")) {
-            qDebug() << "no actions, so we turn this into an empty menu with generated name";
+        bool hasactions = obj.contains("actions");
+        if (! hasactions) {
             menu = new QMenu();
             menu->setTitle(ptrToString(menu));
             QList<QAction*> acts = QList<QAction*>();
             acts.append(buildAction(obj, slotobj, menu));
             menu->addActions(acts);
-            qDebug() << menu->title();
         } else {
-            qDebug() << "We are building a menu";
             menu = buildMenu(obj, slotobj);
         }
         menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
         if (type == TOOLBAR) {
-            // Go through obj, find all action names, add them to tb.
-            qDebug() << "Adding menu " << menu << "to tool bar TODO";
+            QJsonArray arr;
+            // Update the toolbar with our menu
+            if (hasactions) {
+                arr = obj.value("actions").toArray();
+                foreach(QJsonValue val, arr) {
+#ifdef Q_OS_MAC
+                    updateToolBar(this->tb, val, slotobj);
+#endif
+#ifdef Q_OS_LINUX
+                    updateToolBar(this->tb, val, slotobj);
+#endif
+                }
+            } else {
+
+            }
         } else if (type == MENUBAR) {
-            qDebug() << "Adding menu " << menu << "To menu bar" << mb;
             this->mb->addMenu(menu);
         } // If MENU, simply return the menu.
     }
     return menu;
 }
 
-QMenu *QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, QString append, QtMenuGen::UpdateTypes type, QtMenuGen::Injection inj)
+QMenu *QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, QString append, QtMenuGen::UpdateTypes type, QtMenuGen::InjectionTypes inj)
 {
     return new QMenu();
 }
@@ -206,39 +212,72 @@ QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
     }
     return mb;
 }
+
 #if defined(Q_OS_LINUX) || defined(Q_OS_WIN)
+
+void QtMenuGen::updateToolBar(QToolBar *toolbar, QJsonValue val, QObject *slotobj, QString name, InjectionTypes type)
+{
+    QJsonObject actobj = actval.toObject();
+    bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
+    if (actobj.contains("separator") && ! toolbar_hidden) {
+        tb->addSeparator();
+        return;
+    }
+    if (! isValid(actobj)) { return; }
+    const QString _name = actobj.value("name").toString();
+    QAction *act = action_map.value(_name.toLower(), NULL);
+    if (act != NULL) {
+        // Just don't add. As long as OS X is working, or until we impl our own toolbar visibility ui widget,
+        // they can use the menus.
+        if (toolbar_hidden) { return; }
+        tb->addAction(act);
+    }
+}
+
 QToolBar* QtMenuGen::setupToolBar(QWidget *widget, QObject *slotobj)
 {
     QJsonArray arr = jdoc.array();
     QToolBar *tb = new QToolBar(widget);
-
     foreach(QJsonValue val, arr) {
         // QActions already set up and configured
         QJsonObject obj = val.toObject();
         foreach(QJsonValue actval, obj.value("actions").toArray()) {
-            QJsonObject actobj = actval.toObject();
-            bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
-            if (actobj.contains("separator") && ! toolbar_hidden) {
-                tb->addSeparator();
-                continue;
-            }
-            if (! isValid(actobj)) { continue; }
-            const QString name = actobj.value("name").toString();
-            QAction *act = action_map.value(name.toLower(), NULL);
-            if (act != NULL) {
-                // Just don't add. As long as OS X is working, or until we impl our own toolbar visibility ui widget,
-                // they can use the menus.
-                if (toolbar_hidden) { continue; }
-                tb->addAction(act);
-            }
-
+            updateToolBar(tb, actval, slotobj);
         }
     }
     return tb;
 }
+
 #endif
 
 #ifdef Q_OS_MAC
+void QtMenuGen::updateToolBar(QMacToolBar* toolbar, QJsonValue val, QObject *slotobj, QString name, InjectionTypes type)
+{
+    QJsonObject actobj = val.toObject();
+    // Allow hiding of separators on toolbars (but not menus), set toolbar_hidden.
+    bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
+    if (actobj.contains("separator") && ! toolbar_hidden) {
+        toolbar->addSeparator();
+        return;
+    }
+    if (! this->isValid(actobj)) { return; }
+    // FIXME: enabled currently doesn't work on QMacToolBarItem
+    const bool enabled = actobj.value("enabled").toBool(true);
+    QIcon icon = QIcon(actobj.value("icon").toString());
+    const QString _name = actobj.value("text").toString().remove('&');
+
+    QMacToolBarItem *tbitem;
+    if (toolbar_hidden) {
+        tbitem = toolbar->addAllowedItem(icon, _name);
+    } else {
+        tbitem = toolbar->addItem(icon, _name);
+    }
+    QString slot = actobj.value("slot").toString();
+    if (! slot.isEmpty()) {
+        handleSignalSlot(tbitem, "activated()", slotobj, slot.toLocal8Bit().data());
+    }
+}
+
 QMacToolBar* QtMenuGen::setupOSXToolBar(QWidget *widget, QObject *slotobj)
 {
     QJsonArray arr = jdoc.array();
@@ -246,29 +285,7 @@ QMacToolBar* QtMenuGen::setupOSXToolBar(QWidget *widget, QObject *slotobj)
     foreach(QJsonValue val, arr) {
         QJsonObject obj = val.toObject();
         foreach(QJsonValue actval, obj.value("actions").toArray()) {
-            QJsonObject actobj = actval.toObject();
-            // Allow hiding of separators on toolbars (but not menus), set toolbar_hidden.
-            bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
-            if (actobj.contains("separator") && ! toolbar_hidden) {
-                tb->addSeparator();
-                continue;
-            }
-            if (! isValid(actobj)) { continue; }
-            const bool enabled = actobj.value("enabled").toBool(true);
-            QIcon icon = QIcon(actobj.value("icon").toString());
-            // FIXME: enabled currently doesn't work on QMacToolBarItem
-            const QString name = actobj.value("text").toString().remove('&');
-
-            QMacToolBarItem *tbitem;
-            if (toolbar_hidden) {
-                tbitem = tb->addAllowedItem(icon, name);
-            } else {
-                tbitem = tb->addItem(icon, name);
-            }
-            QString slot = actobj.value("slot").toString();
-            if (! slot.isEmpty()) {
-                handleSignalSlot(tbitem, "activated()", slotobj, slot.toLocal8Bit().data());
-            }
+            updateToolBar(tb, actval, slotobj);
         }
     }
     tb->attachToWindow(widget->windowHandle());

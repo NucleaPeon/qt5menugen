@@ -60,8 +60,8 @@
 
 class QT5MENUGENSHARED_EXPORT QtMenuGen
 {
+    Q_ENUMS(InjectionTypes)
     Q_ENUMS(UpdateTypes)
-    Q_ENUMS(Injection)
 public:
     /*!
      * \brief QtMenuGen Object based on a QString path
@@ -97,7 +97,7 @@ public:
      *
      * \version 2.3.0
      */
-    enum Injection { DEFAULT, INSERT_AFTER, INSERT_BEFORE, SUBMENU };
+    enum InjectionTypes { DEFAULT, INSERT_AFTER, INSERT_BEFORE, SUBMENU };
 
     /*!
      * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required.
@@ -203,13 +203,21 @@ public:
      *
      * Menu updates should be reflected immediately.
      *
+     * If you update() on more than one component (ie: toolbar & menubar), the maps will be overwritten; only
+     * one reference will exist at a time. This may cause issues if you need to modify actions or menus to act differently
+     * in two places at once. A possible workaround would be to include a ptr string reference to every menu and action that
+     * is combined using update() calls. For now, using simpler scenarios would be preferred and if you need two varying sets
+     * of differently behaving menus and actions, have two separate json files for each one with different names but same text/slots/etc.
+     *
+     * update() aims to reflect same functionality in multiple areas of your application without modification.
+     *
      * \returns QMenu* of the newly formed QMenu object
      *
      * \version 2.3.0
      */
     QMenu *update(QtMenuGen* menugenobj, QObject *slotobj, UpdateTypes type = MENU);
 
-    QMenu* update(QtMenuGen* menugenobj, QObject *slotobj, QString append, UpdateTypes type = MENU, Injection inj = DEFAULT);
+    QMenu* update(QtMenuGen* menugenobj, QObject *slotobj, QString append, UpdateTypes type = MENU, InjectionTypes inj = DEFAULT);
 
     /*!
      * \brief actionByName Return the QAction* object based on the name assigned to it in the json file
@@ -376,10 +384,12 @@ private:
     QMacToolBar *tb;
     QMacToolBar* setupOSXToolBar(QWidget *widget, QObject *slotobj);
     QMacToolBarItem* toolBarItemByText(QString text);
+    void updateToolBar(QMacToolBar* toolbar, QJsonValue val, QObject *slotobj, QString name = "", InjectionTypes type = DEFAULT);
 #else
     QToolBar *tb;
     QAction* toolBarItemByText(QString text);
     QToolBar* setupToolBar(QWidget *widget, QObject *slotobj);
+    void updateToolBar(QToolBar* toolbar, QJsonValue val, QObject *slotobj, QString name = "", InjectionTypes type = DEFAULT);
 #endif
 
 };

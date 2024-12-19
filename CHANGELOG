@@ -1,3 +1,39 @@
+Version 3.0.0
+=============
+
+* Adding in a function to take a QMenu* and return it's contents as a QButtonGroup with
+  either QPushButtons or QToolButtons. Since we can define groups within the menu, if we
+  want tool buttons set up on a panel or widget, we can simply call this to get all the
+  conversions and slot configurations performed. This also helps reduce code in the main
+  application.
+
+* This release is big enough to require a major release increment. We also store the entire
+  defined QJsonObject within the QAction (from the json file for that object) so we can
+  retrieve slot information when we convert QActions to Q{Tool,Push}Buttons.
+
+* We store the slotobj so we can refer to things later, simplifying method signatures.
+  update() does not utilize the old slotobj, in case user wants to have things call a
+  different QObject slot set. We do not store this update() slotobj anywhere so it's
+  expected to be more of a one-off thing.
+
+Version 2.3.2
+=============
+
+* See github issue #3, there was a problem with update() not adding toolbar items on OS X.
+  The purpose of using update() is to allow users to have multiple json files to reuse
+  definitions. With OS X, adding things to the toolbar after setup means they don't show
+  up, even if they are available in the Customize Toolbar option.
+* Added a constructor to take multiple QString parameters in a list so multiple json files
+  can be used to create menus. This overcomes the OS X limitation (it only affects QMacToolBar,
+  not the global menu system) in a way that's not too complicated, verbose or requiring
+  duplicating work.
+
+Version 2.3.1
+=============
+
+* Fixed things on the Linux/Windows side, there was a segfault occuring due to some bad
+  variable refences.
+
 Version 2.3.0
 =============
 

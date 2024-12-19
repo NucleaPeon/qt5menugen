@@ -66,6 +66,14 @@ QtMenuGen::~QtMenuGen()
 
 }
 
+QPushButton *QtMenuGen::actionToButton(QAction *act)
+{
+    QPushButton* btn = new QPushButton(QIcon(act->icon()), QString(act->text()));
+    QJsonObject data = act->data().toJsonObject();
+    this->handleSignalSlot(btn, "clicked()", this->slotter, data.value("slot").toString().toLocal8Bit().data());
+    return btn;
+}
+
 bool QtMenuGen::loadFile(QString path)
 {
     QFile def(path);
@@ -120,31 +128,34 @@ const QMap<QString, QMenu *> QtMenuGen::menus()
 
 void QtMenuGen::setup(QWidget *widget, QObject *slotobj)
 {
+	this->slotter = slotobj;
     mb = setupMenus(widget);
 #ifdef Q_OS_MAC
-    tb = setupOSXToolBar(widget, slotobj);
+    tb = setupOSXToolBar(widget);
 #else
-    tb = setupToolBar(widget, slotobj);
+    tb = setupToolBar(widget);
 #endif
 }
 
 void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
 {
+	this->slotter = slotobj;
     mb = setupMenus(window);
     window->setMenuBar(mb);
 #ifdef Q_OS_MAC
-    tb = setupOSXToolBar(window, slotobj);
+    tb = setupOSXToolBar(window);
 #else
-    tb = setupToolBar(window, slotobj);
+    tb = setupToolBar(window);
     window->addToolBar(tb);
 #endif
 }
 
 void QtMenuGen::setup(QMenu *menu, QObject *slotobj, QJsonObject obj)
 {
+	this->slotter = slotobj;
     if (obj.isEmpty()) { obj = this->jsonDocument().object(); }
     // const QMetaObject *metaConn = slotobj->metaObject();
-	menu = setupMenu(menu, slotobj, obj);
+	menu = setupMenu(menu, obj);
     menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
 }
 
@@ -224,16 +235,16 @@ const QMap<QString, int> QtMenuGen::getShortcuts()
     return this->shortcuts;
 }
 
-QMenu* QtMenuGen::setupMenu(QObject *slotobj, QJsonObject obj)
+QMenu* QtMenuGen::setupMenu(QJsonObject obj)
 {
     QMenu* m = new QMenu();
-    return setupMenu(m, slotobj, obj);
+    return setupMenu(m, obj);
 }
 
-QMenu* QtMenuGen::setupMenu(QMenu* m, QObject *slotobj,  QJsonObject obj)
+QMenu* QtMenuGen::setupMenu(QMenu* m, QJsonObject obj)
 {
     // setupMenu isn't a proper name for creating menus, so simply call the buildMenu() method.
-    return buildMenu(obj, slotobj, m);
+    return buildMenu(obj, this->slotter, m);
 }
 
 QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
@@ -242,7 +253,7 @@ QMenuBar* QtMenuGen::setupMenus(QWidget *widget)
     QJsonArray arr = jdoc.array();
     foreach(QJsonValue val, arr) {
         QJsonObject obj = val.toObject();
-        QMenu *m = setupMenu(widget, obj);
+        QMenu *m = setupMenu(obj);
         menu_map[obj.value("name").toString("").toLower().replace("&", "")] = m;
         mb->addMenu(m);
     }
@@ -270,7 +281,7 @@ void QtMenuGen::updateToolBar(QToolBar *toolbar, QJsonValue val, QObject *slotob
     }
 }
 
-QToolBar* QtMenuGen::setupToolBar(QWidget *widget, QObject *slotobj)
+QToolBar* QtMenuGen::setupToolBar(QWidget *widget)
 {
     QJsonArray arr = jdoc.array();
     QToolBar *tb = new QToolBar(widget);
@@ -278,7 +289,7 @@ QToolBar* QtMenuGen::setupToolBar(QWidget *widget, QObject *slotobj)
         // QActions already set up and configured
         QJsonObject obj = val.toObject();
         foreach(QJsonValue actval, obj.value("actions").toArray()) {
-            updateToolBar(tb, actval, slotobj);
+            updateToolBar(tb, actval, this->slotter);
         }
     }
     return tb;
@@ -308,20 +319,21 @@ void QtMenuGen::updateToolBar(QMacToolBar* toolbar, QJsonValue val, QObject *slo
     } else {
         tbitem = toolbar->addItem(icon, _name);
     }
+    if (! enabled) { tbitem->setProperty("enabled", enabled); }
     QString slot = actobj.value("slot").toString();
     if (! slot.isEmpty()) {
         handleSignalSlot(tbitem, "activated()", slotobj, slot.toLocal8Bit().data());
     }
 }
 
-QMacToolBar* QtMenuGen::setupOSXToolBar(QWidget *widget, QObject *slotobj)
+QMacToolBar* QtMenuGen::setupOSXToolBar(QWidget *widget)
 {
     QJsonArray arr = jdoc.array();
     QMacToolBar *tb = new QMacToolBar();
     foreach(QJsonValue val, arr) {
         QJsonObject obj = val.toObject();
         foreach(QJsonValue actval, obj.value("actions").toArray()) {
-            updateToolBar(tb, actval, slotobj);
+            updateToolBar(tb, actval, this->slotter);
         }
     }
     tb->attachToWindow(widget->windowHandle());
@@ -440,6 +452,9 @@ QAction *QtMenuGen::buildAction(QJsonObject obj, QObject *slotobj, QMenu* menu)
     }
     act->setEnabled(obj.value("enabled").toBool(true));
     QString slot = obj.value("slot").toString();
+    // slot is important enough information to store in the QAction's data.
+    // Just store everythign.
+    act->setData(QVariant(obj));
     if (! slot.isEmpty()) {
         handleSignalSlot(act, "triggered()", slotobj, slot.toLocal8Bit().data());
     }

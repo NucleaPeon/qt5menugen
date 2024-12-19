@@ -1,0 +1,74 @@
+[
+    {
+        "name": "&File",
+        "actions": [
+            {
+                "name": "new",
+                "text": "&New",
+                "shortcut": "Ctrl+N"
+            },
+            {
+                "name": "open",
+                "text": "&Open",
+                "shortcut": "Ctrl+O"
+            },
+            {
+                "separator": true
+            },
+            {
+                "name": "save",
+                "text": "&Save",
+                "shortcut": "Ctrl+S"
+            },
+            {
+                "name": "save-as",
+                "text": "Save &As",
+                "shortcut": "Ctrl+Shift+S"
+            },
+            {
+                "name": "Test",
+                "actions": [
+                    {
+                        "name": "test-submenu",
+                        "text": "Submenu Test"
+                    }
+                ]
+            },
+            {
+                "separator": true
+            },
+            {
+                "name": "print",
+                "text": "&Print",
+                "shortcut": "Ctrl+P"
+            },
+            {
+                "name": "quit",
+                "text": "&Quit",
+                "slot": "close()",
+                "toolbar_hidden": true,
+                "shortcut": "Ctrl+Q"
+            }
+
+        ]
+    },
+    {
+        "name": "&Edit",
+        "actions": [
+            {
+                "name": "preferences",
+                "text": "&Preferences",
+                "shortcut": "Ctrl+Shift+P"
+            }
+        ]
+    },
+    {
+        "name": "&Help",
+        "actions": [
+            {
+                "name": "about",
+                "text": "&About"
+            }
+        ]
+    }
+]

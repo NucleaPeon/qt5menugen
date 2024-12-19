@@ -68,7 +68,7 @@ Instead of having many QMenu and QAction declarations in your qt5 c++ header fil
 ### Using in your CMake Project
 
 In the recent v2.0.3 release, we now support ``find_package()`` as a way to determine package version.
-Substitute with the latest desired version (2.3.1) as of December 2024.
+Substitute with the latest desired version (3.0.0) as of December 2024.
 To use within a CMake file:
 
 ```

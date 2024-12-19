@@ -13,11 +13,14 @@
 #include <QtCore/QJsonParseError>
 #include <QFile>
 #include <QUrl>
+#include <QtCore/QHash>
 #include <QtCore/QList>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QAction>
 #include <QtWidgets/QActionGroup>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QButtonGroup>
 #include <QtCore/QMap>
 
 #ifdef Q_OS_MAC
@@ -63,6 +66,7 @@ class QT5MENUGENSHARED_EXPORT QtMenuGen
 {
     Q_ENUMS(InjectionTypes)
     Q_ENUMS(UpdateTypes)
+
 public:
     /*!
      * \brief QtMenuGen Object based on a QString path
@@ -108,6 +112,8 @@ public:
     QtMenuGen(QUrl path);
     ~QtMenuGen();
 
+
+    QPushButton* actionToButton(QAction* act);
 
     /*!
      *  brief The UpdateTypes enum specifies whether to *additionally* allow \sa update() to add to various areas where menus are created
@@ -321,7 +327,7 @@ private:
      *
 	 * \version 2.1.0
 	 */
-    QMenu* setupMenu(QObject* slotobj, QJsonObject obj = QJsonObject());
+    QMenu* setupMenu(QJsonObject obj = QJsonObject());
     /*!
      * \brief Internal method to setup a single menu
      *
@@ -333,7 +339,7 @@ private:
 	 *
 	 * \version 2.1.0
 	 */
-    QMenu* setupMenu(QMenu* m, QObject *slotobj, QJsonObject obj = QJsonObject());
+    QMenu* setupMenu(QMenu* m, QJsonObject obj = QJsonObject());
 
     QMenuBar* setupMenus(QWidget *widget);
     QMap<QString, int> load_shortcuts();
@@ -406,10 +412,11 @@ private:
     QMap<QString, QActionGroup*> group_map;
     QMap<QString, QMenu*> menu_map;
     QMenuBar* mb;
+    QObject *slotter;
 
 #ifdef Q_OS_MAC
     QMacToolBar *tb;
-    QMacToolBar* setupOSXToolBar(QWidget *widget, QObject *slotobj);
+    QMacToolBar* setupOSXToolBar(QWidget *widget);
     QMacToolBarItem* toolBarItemByText(QString text);
     void updateToolBar(QMacToolBar* toolbar, QJsonValue val, QObject *slotobj, QString name = "", InjectionTypes type = DEFAULT);
 #else

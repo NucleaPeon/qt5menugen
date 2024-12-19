@@ -6,7 +6,7 @@ project(CombiningMenus
 
 find_package(Qt5 REQUIRED Widgets)
 include(FindPkgConfig)
-find_package(qt5menugen CONFIG REQUIRED 2.3.0)
+find_package(qt5menugen CONFIG REQUIRED 2.3.2)
 
 if(APPLE)
 	find_package(Qt5 REQUIRED MacExtras)

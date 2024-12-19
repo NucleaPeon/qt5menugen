@@ -12,6 +12,44 @@ QtMenuGen::QtMenuGen(QString path)
     this->loadFile(path);
 }
 
+QtMenuGen::QtMenuGen(QList<QString> paths)
+{
+    this->action_map = QMap<QString, QAction*>();
+    this->group_map = QMap<QString, QActionGroup*>();
+    this->menu_map = QMap<QString, QMenu*>();
+    this->shortcuts = QMap<QString, int>();
+    this->loaded = false;
+    this->configured = false;
+    QJsonDocument doc = QJsonDocument();
+    QJsonArray arr = QJsonArray();
+
+    foreach(const QString str, paths) {
+	    QFile def(str);
+    	if (def.exists()) {
+        	if (def.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            	QJsonParseError err;
+	            QJsonDocument _doc = QJsonDocument::fromJson(def.readAll(), &err);
+    	        if(err.error != QJsonParseError::NoError) {
+        	        QString msg = QString("Unable to parse json file (%1)").arg(err.errorString());
+            	    qWarning(msg.toLatin1());
+            	}
+            	def.close();
+            	if (_doc.isArray()) {
+					foreach(QJsonValue val, _doc.array()) {
+						arr.append(val);
+					}
+            	} else if(_doc.isObject()) {
+            		arr.append(_doc.object());
+            	}
+       		}
+        	load_shortcuts();
+        }
+    }
+	doc.setArray(arr);
+	this->jdoc = doc;
+    this->loaded = true;
+}
+
 QtMenuGen::QtMenuGen(QUrl path)
 {
     this->action_map = QMap<QString, QAction*>();

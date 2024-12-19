@@ -3,6 +3,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include <qt5menugen.h>
+#include <QtCore/QStringList>
 
 namespace Ui {
 class MainWindow;

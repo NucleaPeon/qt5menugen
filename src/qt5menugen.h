@@ -13,6 +13,7 @@
 #include <QtCore/QJsonParseError>
 #include <QFile>
 #include <QUrl>
+#include <QtCore/QList>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QAction>
@@ -69,6 +70,32 @@ public:
      * \version 2.0.0
      */
     explicit QtMenuGen(QString path);
+    /*!
+     * \brief QtMenuGen constructor that loads multiple json files into the main QJsonDocument
+     * \param paths list of strings to json files
+     * \version 2.3.2
+     *
+     * In order to work around https://github.com/NucleaPeon/qt5menugen/issues/3,
+     * I'm adding in a constructor to build menus from multiple json files.
+     * Simply put, update()'ing multiple qtmenugen objects after setup() does
+     * not add toolbar items on os x 10.6. In order to have the desired toolbar
+     * setup while having multiple json files, pass them in here.
+     * A fix will be looked into, but it still may be desirable to have this.
+     *
+     * The json files passed in must either be an array or an object. Arrays will
+     * have priority as it is assumed that they are the toolbar definitions of a main window.
+     * Basically we define the our QJsonDocument as an empty array and if an array is
+     * found in a json file, it is extended onto our array. If we see an object, it's
+     * appended as a single item into that array.
+     * - We start with []
+     * - json defines [{...}], so we end up with [{...}].
+     * - json defines {...}, so we end up with [{...},{...}]
+     * - json defines another [{...}], so we append it as [{...},{...},{...}]
+     *
+     * Order matters. If you start with an object then pass in an array, you get:
+     * - [{object}, {extended},{array},{objects}].
+     */
+    QtMenuGen(QList<QString> paths);
     /*!
      * \brief QtMenuGen Object based on a QUrl path
      *
@@ -319,7 +346,7 @@ private:
      * \param slot
      */
     void handleSignalSlot(QObject *connector, const char *signal, QObject *caller, const char *slot);
-    
+
     bool isValid(const QJsonObject obj);
 
     /*!

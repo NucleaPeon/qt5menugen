@@ -339,6 +339,8 @@ See the included ``example/`` project for including it in a project.
 ## Troubleshooting and Workarounds
 
 * While testing ``update()`` on OS X 10.6, any menu entries in the target ``.json`` update file will NOT show up in the toolbar. The workaround is to have all the toolbar items you want in the main toolbar ``.json`` file for now. I will investigate perhaps adding in an objective c file that contains code for dynamically adding in toolbar items using ``NSToolbar``, but that is low priority for now. Not sure if this issue appears in later OS X versions or if it's a QT5.3 version issue.
+** You can use the 2.3.2 version constructor to pass in all your json files before setup so your toolbars are correct while not having to duplicate code. See the CombiningMenus example for how to handle MAC_OS if you want to still use update() on other OS's.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

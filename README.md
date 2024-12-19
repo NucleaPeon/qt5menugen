@@ -68,7 +68,7 @@ Instead of having many QMenu and QAction declarations in your qt5 c++ header fil
 ### Using in your CMake Project
 
 In the recent v2.0.3 release, we now support ``find_package()`` as a way to determine package version.
-Substitute with the latest desired version (2.3.0) as of December 2024.
+Substitute with the latest desired version (2.3.1) as of December 2024.
 To use within a CMake file:
 
 ```
@@ -185,7 +185,7 @@ You can write submenus by having the ``name`` and ``actions`` keys and the corre
 An empty submenu simply requires an empty ``actions`` array; there may be cases where you plan to fill it in later.
 
 
-You can reuse qt5menugen objects using the ``update()`` method in version 2.3.0:
+You can reuse qt5menugen objects using the ``update()`` method in version 2.3.0+:
 
 ```
     this->main = new QtMenuGen(":/toolbar");
@@ -333,6 +333,12 @@ See the included ``example/`` project for including it in a project.
 * This project is affected by https://bugreports.qt.io/browse/QTBUG-38256 on OSX. In particular, setting a shortcut to Delete (Qt::Key_Delete/Key_Backspace) or using the StandardKey enum Delete will not work on OSX. This is not something this project can **fix**, it will require a workaround or a fix in the Qt 5.3.x fork. See https://forum.qt.io/topic/35591/single-key-qaction-shortcuts-don-t-work-on-mac-os-x-qt-5-x for more context.
 
 * This library contains its own pkgconfig .pc file (and a [pkg]-config.cmake) to allow find_package() to function. By default, it will be installed to ``/usr/local/share/pkgconfig`` even on OSX. It's possible that OSX expects /usr/lib/pkgconfig, so use ``-DCMAKE_INSTALL_DATAROOTDIR="usr/lib"`` to avoid that. If you encounter a bug, please file an issue.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Troubleshooting and Workarounds
+
+* While testing ``update()`` on OS X 10.6, any menu entries in the target ``.json`` update file will NOT show up in the toolbar. The workaround is to have all the toolbar items you want in the main toolbar ``.json`` file for now. I will investigate perhaps adding in an objective c file that contains code for dynamically adding in toolbar items using ``NSToolbar``, but that is low priority for now. Not sure if this issue appears in later OS X versions or if it's a QT5.3 version issue.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

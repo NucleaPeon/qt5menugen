@@ -1,5 +1,5 @@
 #include "qt5menugen.h"
-
+#include <QDebug>
 
 QtMenuGen::QtMenuGen(QString path)
 {
@@ -22,29 +22,34 @@ QtMenuGen::QtMenuGen(QList<QString> paths, bool separate_menus)
     this->configured = false;
     QJsonDocument doc = QJsonDocument();
     QJsonArray arr = QJsonArray();
+    const QString jsonstring = "{\"separator\": true}";
 
     foreach(const QString str, paths) {
-	    QFile def(str);
-    	if (def.exists()) {
-        	if (def.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            	QJsonParseError err;
-	            QJsonDocument _doc = QJsonDocument::fromJson(def.readAll(), &err);
-    	        if(err.error != QJsonParseError::NoError) {
-        	        QString msg = QString("Unable to parse json file (%1)").arg(err.errorString());
-            	    qWarning(msg.toLatin1());
-            	}
-            	def.close();
-            	if (_doc.isArray()) {
-					foreach(QJsonValue val, _doc.array()) {
-						arr.append(val);
-					}
-            	} else if(_doc.isObject()) {
-            		arr.append(_doc.object());
-            	}
-       		}
-        	load_shortcuts();
+        QFile def(str);
+        if (def.exists()) {
+            if (def.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QJsonParseError err;
+                QJsonDocument _doc = QJsonDocument::fromJson(def.readAll(), &err);
+                if(err.error != QJsonParseError::NoError) {
+                    QString msg = QString("Unable to parse json file (%1)").arg(err.errorString());
+                    qWarning(msg.toLatin1());
+                }
+                def.close();
+                if (_doc.isArray()) {
+                    foreach(QJsonValue val, _doc.array()) {
+                        arr.append(val);
+                    }
+                } else if(_doc.isObject()) {
+                    if (separate_menus && arr.count() > 0) {
+                        // Do not add unless there is content, as to not have weird spaces at the start
+                        QJsonDocument jsonsep = QJsonDocument::fromJson(jsonstring.toLatin1());
+                        arr.append(QJsonValue(jsonsep.object()));
+                    }
+                    arr.append(_doc.object());
+                }
+            }
+            load_shortcuts();
         }
-        arr.append(QJsonValue("{}"));
     }
 	doc.setArray(arr);
 	this->jdoc = doc;
@@ -302,6 +307,7 @@ QToolBar* QtMenuGen::setupToolBar(QWidget *widget)
 void QtMenuGen::updateToolBar(QMacToolBar* toolbar, QJsonValue val, QObject *slotobj, QString name, InjectionTypes type)
 {
     QJsonObject actobj = val.toObject();
+    qDebug() << "updateToolBar" << val;
     // Allow hiding of separators on toolbars (but not menus), set toolbar_hidden.
     bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
     if (actobj.contains("separator") && ! toolbar_hidden) {
@@ -333,8 +339,12 @@ QMacToolBar* QtMenuGen::setupOSXToolBar(QWidget *widget)
     QMacToolBar *tb = new QMacToolBar();
     foreach(QJsonValue val, arr) {
         QJsonObject obj = val.toObject();
-        foreach(QJsonValue actval, obj.value("actions").toArray()) {
-            updateToolBar(tb, actval, this->slotter);
+        if (obj.contains("actions")) {
+            foreach(QJsonValue actval, obj.value("actions").toArray()) {
+                updateToolBar(tb, actval, this->slotter);
+            }
+        } else {
+            updateToolBar(tb, obj, this->slotter);
         }
     }
     tb->attachToWindow(widget->windowHandle());

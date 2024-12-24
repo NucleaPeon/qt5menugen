@@ -1,5 +1,4 @@
 #include "qt5menugen.h"
-#include <QDebug>
 
 QtMenuGen::QtMenuGen(QString path)
 {
@@ -307,7 +306,6 @@ QToolBar* QtMenuGen::setupToolBar(QWidget *widget)
 void QtMenuGen::updateToolBar(QMacToolBar* toolbar, QJsonValue val, QObject *slotobj, QString name, InjectionTypes type)
 {
     QJsonObject actobj = val.toObject();
-    qDebug() << "updateToolBar" << val;
     // Allow hiding of separators on toolbars (but not menus), set toolbar_hidden.
     bool toolbar_hidden = actobj.value("toolbar_hidden").toBool(false);
     if (actobj.contains("separator") && ! toolbar_hidden) {

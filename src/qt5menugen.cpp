@@ -12,7 +12,7 @@ QtMenuGen::QtMenuGen(QString path)
     this->loadFile(path);
 }
 
-QtMenuGen::QtMenuGen(QList<QString> paths)
+QtMenuGen::QtMenuGen(QList<QString> paths, bool separate_menus)
 {
     this->action_map = QMap<QString, QAction*>();
     this->group_map = QMap<QString, QActionGroup*>();
@@ -44,6 +44,7 @@ QtMenuGen::QtMenuGen(QList<QString> paths)
        		}
         	load_shortcuts();
         }
+        arr.append(QJsonValue("{}"));
     }
 	doc.setArray(arr);
 	this->jdoc = doc;
@@ -68,8 +69,8 @@ QtMenuGen::~QtMenuGen()
 
 QPushButton *QtMenuGen::actionToButton(QAction *act)
 {
-    QPushButton* btn = new QPushButton(QIcon(act->icon()), QString(act->text()));
     QJsonObject data = act->data().toJsonObject();
+    QPushButton* btn = new QPushButton(QIcon(act->icon()), QString(act->text()));
     this->handleSignalSlot(btn, "clicked()", this->slotter, data.value("slot").toString().toLocal8Bit().data());
     return btn;
 }

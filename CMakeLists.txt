@@ -49,10 +49,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC src/)
 list(APPEND TEST_SOURCES
     tests/test_runner.cpp
     tests/test_qwidget_menu.cpp
+    tests/test_json.cpp
 )
 
 list(APPEND TEST_HEADERS
     tests/test_qwidget_menu.h
+    tests/test_json.h
 )
 
 list(APPEND TEST_UIS

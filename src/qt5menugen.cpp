@@ -131,6 +131,21 @@ const QMap<QString, QMenu *> QtMenuGen::menus()
     return this->menu_map;
 }
 
+void QtMenuGen::applySignalSlot(QObject *connector, const char *signal, QObject *caller, const char *slot)
+{
+    const QMetaObject *metaConn = connector->metaObject();
+    int sigIdx = metaConn->indexOfSignal(signal);
+    if (sigIdx < 0) { warn(QString("qt5menugen: %1: %2").arg("signal method not found").arg(signal)); return; }
+    const QMetaMethod sigMethod = metaConn->method(sigIdx);
+
+    const QMetaObject *metaCall = caller->metaObject();
+    int slotIdx = metaCall->indexOfSlot(slot);
+    if (slotIdx < 0) { warn(QString("qt5menugen: %1: %2 on %3").arg("slot method not found").arg(slot).arg(metaCall->className())); return; }
+    const QMetaMethod slotMethod = metaCall->method(slotIdx);
+
+    QObject::connect(connector, sigMethod, caller, slotMethod);
+}
+
 void QtMenuGen::setup(QWidget *widget, QObject *slotobj)
 {
 	this->slotter = slotobj;

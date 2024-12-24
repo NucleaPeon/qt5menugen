@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include ""
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -8,8 +7,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 	this->main = new QtMenuGen(":/toolbar");
     this->main->setup(this, this);
-
-    this->ui->centralWidget->add
 }
 
 MainWindow::~MainWindow()

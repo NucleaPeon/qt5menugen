@@ -317,6 +317,15 @@ public:
      */
     const QMap<QString, QMenu*> menus();
 
+    /*!
+     * \brief applySignalSlot Static public version of handleSignalSlot()
+     * \param connector
+     * \param signal
+     * \param caller
+     * \param slot
+     */
+    static void applySignalSlot(QObject *connector, const char *signal, QObject *caller, const char *slot);
+
 private:
 	/*!
      * \brief Internal method to setup a single menu

@@ -1,11 +1,20 @@
+Version 3.0.2
+=============
+
+* Removed debugging info
+
+Version 3.0.1
+=============
+
+* Fixed toolbar spacing due to too many separators being added to the toolbar.
+
 Version 3.0.0
 =============
 
-* Adding in a function to take a QMenu* and return it's contents as a QButtonGroup with
-  either QPushButtons or QToolButtons. Since we can define groups within the menu, if we
-  want tool buttons set up on a panel or widget, we can simply call this to get all the
-  conversions and slot configurations performed. This also helps reduce code in the main
-  application.
+* Constructor that takes in multiple string paths to work around osx bug where toolbar items
+  not being added on update() (after initial construction of toolbars).
+  This allows multiple files to be used for organization and reference later. Option to add
+  separators between each file automatically for nicer toolbar spacing.
 
 * This release is big enough to require a major release increment. We also store the entire
   defined QJsonObject within the QAction (from the json file for that object) so we can

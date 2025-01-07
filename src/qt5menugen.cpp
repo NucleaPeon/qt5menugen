@@ -78,6 +78,17 @@ QPushButton *QtMenuGen::actionToButton(QAction *act)
     this->handleSignalSlot(btn, "clicked()", this->slotter, data.value("slot").toString().toLocal8Bit().data());
     return btn;
 }
+#ifdef Q_OS_MAC
+QMacToolBar *QtMenuGen::toolBar()
+{
+    return this->tb;
+}
+#else
+QToolBar *QtMenuGen::toolBar()
+{
+    return this->tb;
+}
+#endif
 
 bool QtMenuGen::loadFile(QString path)
 {

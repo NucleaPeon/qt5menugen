@@ -115,6 +115,21 @@ public:
 
 
     QPushButton* actionToButton(QAction* act);
+#ifdef Q_OS_MAC
+    /*!
+     * \brief toolBar is returned
+     * \version 3.0.2
+     * \return QMacToolBar*
+     */
+    QMacToolBar* toolBar();
+#else
+    /*!
+     * \brief toolBar is returned
+     * \version 3.0.2
+     * \return QToolBar*
+     */
+    QToolBar* toolBar();
+#endif
 
     /*!
      *  brief The UpdateTypes enum specifies whether to *additionally* allow \sa update() to add to various areas where menus are created

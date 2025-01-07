@@ -118,14 +118,14 @@ public:
 #ifdef Q_OS_MAC
     /*!
      * \brief toolBar is returned
-     * \version 3.0.2
+     * \version 3.0.3
      * \return QMacToolBar*
      */
     QMacToolBar* toolBar();
 #else
     /*!
      * \brief toolBar is returned
-     * \version 3.0.2
+     * \version 3.0.3
      * \return QToolBar*
      */
     QToolBar* toolBar();

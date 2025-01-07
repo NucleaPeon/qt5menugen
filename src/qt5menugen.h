@@ -393,7 +393,7 @@ private:
      *
      * \version 2.1.1
      */
-    void warn(QString message);
+    static void warn(QString message);
 
     /*!
      * \brief buildAction moved QAction* building code into this one method to compartmentalize it

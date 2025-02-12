@@ -5,3 +5,4 @@ docs/
 *.pro
 *.o
 Makefile
+CMakeLists.txt.user

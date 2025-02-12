@@ -446,8 +446,8 @@ private:
     void updateToolBar(QMacToolBar* toolbar, QJsonValue val, QObject *slotobj, QString name = "", InjectionTypes type = DEFAULT);
 #else
     QToolBar *tb;
+    QToolBar* setupToolBar(QWidget *widget);
     QAction* toolBarItemByText(QString text);
-    QToolBar* setupToolBar(QWidget *widget, QObject *slotobj);
     void updateToolBar(QToolBar* toolbar, QJsonValue val, QObject *slotobj, QString name = "", InjectionTypes type = DEFAULT);
 #endif
 

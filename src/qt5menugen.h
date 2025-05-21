@@ -138,7 +138,7 @@ public:
      * - MENU: Updates the menu within the calling qtmenugen object's defined menus.
      * - MENUBAR: Updates the menubar with the calling qtmenugen object's defined menus
      * - TOOLBAR: Updates the toolbar with the calling qtmenugen object's defined menus
-     * - NONE: Returns a \sa QMenu with the updates, but doesn't modify the supplied object (v3.0.3)
+     * - NONE: Returns a \sa QMenu with the updates, but doesn't modify the supplied object (v3.0.4)
      *
      * \version 2.3.0
      */
@@ -161,7 +161,7 @@ public:
      * - PREPEND: to the beginning of the menu
      * - INSERT: somewhere in between the beginning and end, assumes additional input
      *
-     * \version 3.0.3
+     * \version 3.0.4
      */
     enum UpdateStyle { APPEND, PREPEND, INSERT };
 
@@ -314,7 +314,7 @@ public:
      *
      * \return QMenu*
      *
-     * \version 3.0.3
+     * \version 3.0.4
      */
     QMenu *update(QtMenuGen* menugenobj, QObject *slotobj, QString menuTitle, UpdateStyle style = APPEND, QString attachTo = "");
 
@@ -473,7 +473,7 @@ private:
      * \param menu
      * \return QMenu*
      *
-     * \version 3.0.3
+     * \version 3.0.4
      */
     QMenu *buildMenu(QJsonArray arr,  QObject* slotobj, QMenu *menu = new QMenu());
 

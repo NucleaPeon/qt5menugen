@@ -224,7 +224,7 @@ public:
     void setup(QMainWindow *window, QObject *slotobj);
 
     /*!
-     * \brief setup configures the Menu with a json file containing a json object with {name: "", actions: []}.
+     * \brief setup configures the Menu with a json file containing a json object with {name: "...", actions: [...]}.
      *
      * QMenu* will be reassigned to the content in the json file and returned.
      * The json required to set just the menu is
@@ -245,8 +245,8 @@ public:
      * {
      *     // Title is specified in the json file
      *     QMenu *contextMenu = new QMenu();
-     *     this->qtmg = QtMenuGen(":/files/just_one_menu.json");
-     *     this->qtmg.setup(contextMenu, this);
+     *     this->qtmg = new QtMenuGen(":/files/just_one_menu.json");
+     *     this->qtmg->setup(contextMenu, this);
      * }
      * \endcode
      *
@@ -294,6 +294,24 @@ public:
      * \param menuTitle QString to determine which specific menu of this QtMenuGen* object is added to or "*" for all menus.
      * \param style how menu will be attached, whether at the beginning, end, or somewhere in the middle
      * \param attachTo QString if UpdateStyle is set to INSERT, this needs to be set to the action name or will append if empty.
+     *
+     * This example will combine one QtMenuGen*'s menu with another one. It seems individual menus have to be handled specially.
+     *
+     * \code{.cpp}
+     * #include <qtmenugen.h>
+     *
+     * // ...
+     * {
+     *     QMenu *contextMenu = new QMenu();
+     *     this->context = new QtMenuGen(":/files/context.json");
+     *     this->context->setup(contextMenu, this);
+     *     this->contextcommon = new QtMenuGen(":/files/common.json");
+     *     this->context->update(this->contextcommon, this, "*");
+     * }
+     * \endcode
+     *
+     * Replace "*" with the name of your menu in order to only affect one menu.
+     *
      * \return QMenu*
      *
      * \version 3.0.3

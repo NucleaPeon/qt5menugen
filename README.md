@@ -68,11 +68,11 @@ Instead of having many QMenu and QAction declarations in your qt5 c++ header fil
 ### Using in your CMake Project
 
 In the recent v2.0.3 release, we now support ``find_package()`` as a way to determine package version.
-Substitute with the latest desired version (3.0.0) as of December 2024.
+Substitute with the latest desired version (3.0.3) as of May 2025.
 To use within a CMake file:
 
 ```
-    find_package(qt5menugen CONFIG REQUIRED 2.0.3)
+    find_package(qt5menugen CONFIG REQUIRED 3.0.3)
 
     ...
 
@@ -198,6 +198,21 @@ You can reuse qt5menugen objects using the ``update()`` method in version 2.3.0+
 
 Note: Using update() with the toolbar doesn't necessarily mean they will be visible; you may have to
 update the toolbar with the newly added content. See the CombiningMenus example for more information.
+
+For ease of use, version 3.0.3 contains another update() function with a QMenu* specific target.
+
+For a context menu that contains common elements defined in json, you would use the following code:
+
+```
+    this->contextMenu = new QMenu();
+    this->context = new QtMenuGen(":/context");
+    this->context->setup(this->contextMenu, this);
+    
+    this->contextcommon = new QtMenuGen(":/contextcommon");
+    this->context->update(this->contextcommon, this, "*"); // Adds common menu to all stored menus.
+```
+
+
 
 
 **Building Documentation:**

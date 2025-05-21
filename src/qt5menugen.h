@@ -66,6 +66,7 @@ class QT5MENUGENSHARED_EXPORT QtMenuGen
 {
     Q_ENUMS(InjectionTypes)
     Q_ENUMS(UpdateTypes)
+    Q_ENUMS(UpdateStyle)
 
 public:
     /*!
@@ -132,11 +133,16 @@ public:
 #endif
 
     /*!
-     *  brief The UpdateTypes enum specifies whether to *additionally* allow \sa update() to add to various areas where menus are created
+     *  \brief The UpdateTypes enum specifies whether to *additionally* allow \sa update() to add to various areas where menus are created
+     *
+     * - MENU: Updates the menu within the calling qtmenugen object's defined menus.
+     * - MENUBAR: Updates the menubar with the calling qtmenugen object's defined menus
+     * - TOOLBAR: Updates the toolbar with the calling qtmenugen object's defined menus
+     * - NONE: Returns a \sa QMenu with the updates, but doesn't modify the supplied object (v3.0.3)
      *
      * \version 2.3.0
      */
-    enum UpdateTypes { MENU, MENUBAR, TOOLBAR };
+    enum UpdateTypes { MENU, MENUBAR, TOOLBAR, NONE };
     /*!
      * \brief The Injection enum determines where the update() will occur if given a menu name
      *
@@ -147,6 +153,17 @@ public:
      * \version 2.3.0
      */
     enum InjectionTypes { DEFAULT, INSERT_AFTER, INSERT_BEFORE, SUBMENU };
+
+    /*!
+     * \brief The UpdateStyle enum determines how QMenu* objects are appended to other QMenu* objects.
+     *
+     * - APPEND: to the end of the menu
+     * - PREPEND: to the beginning of the menu
+     * - INSERT: somewhere in between the beginning and end, assumes additional input
+     *
+     * \version 3.0.3
+     */
+    enum UpdateStyle { APPEND, PREPEND, INSERT };
 
     /*!
      * \brief loadFile will explicitly load the Json file, such as scenarios where no toolbar or menu setup is required.
@@ -245,20 +262,24 @@ public:
      * \param menugenobj QtMenuGen* object to copy and append
      * \param UpdateTypes will add the QtMenuGen object contents to the toolbar and/or menubar if specified.
      *
-     * There may be scenarios where the user wants to have menus that appear in both the toolbar and in
-     * other places, such as a list of tools in a drawing or editing program. By calling update() on
+     *
+     * There may be scenarios where the user wants to have menus that appear in the toolbar and other places,
+     * such as a list of tools in a drawing or editing program. By calling update() on
      * a \c QtMenuGen* object, we can create a copy of the containing menus and actions so the developer doesn't
      * have to manually do this.
      *
      * Menu updates should be reflected immediately.
+     * If you are update()'ing using an UpdateTypes of MENU, it adds the Menu internally but doesn't utilize it like
+     * a toolbar or menubar. For instance, if using it as a context menu, you'd need to reference the menu using
+     * \sa menuByName(const QString name) and exec() it from there.
+     * Or you can use the newly minted update() function below that gives more options for updating an existing menu.
      *
-     * If you update() on more than one component (ie: toolbar & menubar), the maps will be overwritten; only
-     * one reference will exist at a time. This may cause issues if you need to modify actions or menus to act differently
-     * in two places at once. A possible workaround would be to include a ptr string reference to every menu and action that
-     * is combined using update() calls. For now, using simpler scenarios would be preferred and if you need two varying sets
-     * of differently behaving menus and actions, have two separate json files for each one with different names but same text/slots/etc.
+     * If you update() on more than one component (ie: the toolbar AND menubar), they both will reference the same menu
+     * and have the same behavior. If you need differing behavior, it may be more prudent to have different json files
+     * updated to their respective components.
      *
-     * update() aims to reflect same functionality in multiple areas of your application without modification.
+     * QtMenuGen* also has a \sa ptrToString(QMenu*) function that creates a name from the pointer, so you can generate the
+     * same menu from the same json file and have it as a separate menu instance to reference as you please.
      *
      * \returns QMenu* of the newly formed QMenu object
      *
@@ -266,7 +287,18 @@ public:
      */
     QMenu *update(QtMenuGen* menugenobj, QObject *slotobj, UpdateTypes type = MENU);
 
-    QMenu* update(QtMenuGen* menugenobj, QObject *slotobj, QString append, UpdateTypes type = MENU, InjectionTypes inj = DEFAULT);
+    /*!
+     * \brief update menus specifically
+     * \param menugenobj QtMenuGen* object to take menus from
+     * \param slotobj QObject* to call slots on
+     * \param menuTitle QString to determine which specific menu of this QtMenuGen* object is added to or "*" for all menus.
+     * \param style how menu will be attached, whether at the beginning, end, or somewhere in the middle
+     * \param attachTo QString if UpdateStyle is set to INSERT, this needs to be set to the action name or will append if empty.
+     * \return QMenu*
+     *
+     * \version 3.0.3
+     */
+    QMenu *update(QtMenuGen* menugenobj, QObject *slotobj, QString menuTitle, UpdateStyle style = APPEND, QString attachTo = "");
 
     /*!
      * \brief actionByName Return the QAction* object based on the name assigned to it in the json file
@@ -285,29 +317,29 @@ public:
      */
     QMenu* menuByName(const QString name);
 
-	/*!
-	 * \version 2.0.0
-	 */
+    /*!
+     * \version 2.0.0
+     */
     bool isLoaded();
 
-	/*!
-	 * \version 2.0.0
+    /*!
+     * \version 2.0.0
      * \return QMap<QString, int>
-	 */
+     */
     const QMap<QString, int> getShortcuts();
 
-	/*!
-	 * \brief Returns json that is read in or an invalid/empty json object
-	 *
-	 * In certain cases such as testing, it's useful to know what has been
-	 * read in but no toolbars or menus are required. Calling this after a
-	 * successful contructor call or \c loadFile() call will allow this to
-	 * return a valid QJsonDocument object.
-	 * \sa QJsonDocument
-	 *
-	 * \version 2.0.0
+    /*!
+     * \brief Returns json that is read in or an invalid/empty json object
+     *
+     * In certain cases such as testing, it's useful to know what has been
+     * read in but no toolbars or menus are required. Calling this after a
+     * successful contructor call or \c loadFile() call will allow this to
+     * return a valid QJsonDocument object.
+     * \sa QJsonDocument
+     *
+     * \version 2.0.0
      * \return QJsonDocument
-	 */
+     */
     const QJsonDocument jsonDocument();
 
     /*!
@@ -342,28 +374,28 @@ public:
     static void applySignalSlot(QObject *connector, const char *signal, QObject *caller, const char *slot);
 
 private:
-	/*!
+    /*!
      * \brief Internal method to setup a single menu
      *
-	 * Creates a new menu (default behaviour internally) and sets it up, then
+     * Creates a new menu (default behaviour internally) and sets it up, then
      * returns it.
      *
      * \param QJsonObject obj: If empty, pulls from the jsonDocument() contents
      *
-	 * \version 2.1.0
-	 */
+     * \version 2.1.0
+     */
     QMenu* setupMenu(QJsonObject obj = QJsonObject());
     /*!
      * \brief Internal method to setup a single menu
      *
      * For use with a single menu generation only (ie: for contextual menus) using \c setup(QMenu, QObject);
      * wherein it reuses the passed in QMenu* object.
-	 *
-	 * If \c QJsonObject \c obj is empty, we pull from \c this->jsonDocument(). This is set internally to work with json files that contain multiple menus.
-	 * Normal users shouldn't have to set this at all.
-	 *
-	 * \version 2.1.0
-	 */
+     *
+     * If \c QJsonObject \c obj is empty, we pull from \c this->jsonDocument(). This is set internally to work with json files that contain multiple menus.
+     * Normal users shouldn't have to set this at all.
+     *
+     * \version 2.1.0
+     */
     QMenu* setupMenu(QMenu* m, QJsonObject obj = QJsonObject());
 
     QMenuBar* setupMenus(QWidget *widget);
@@ -407,7 +439,7 @@ private:
 
     /*!
      * \brief buildMenu moved QMenu* building code into this one method to compartmentalize it
-     * \param obj
+     * \param obj QJsonObject
      * \param slotobj
      * \param menu a default empty menu. If you pass in an existing QMenu, its title will be overwritten,
      *        menus, separators and actions will be added to it on top of what might already exist.
@@ -416,6 +448,16 @@ private:
      * \version 2.3.0
      */
     QMenu *buildMenu(QJsonObject obj, QObject* slotobj, QMenu *menu = new QMenu());
+    /*!
+     * \brief buildMenu moved QMenu* building code into this one method to compartmentalize it
+     * \param arr QJsonArray, assumes the actions[] array is being supplied with no title.
+     * \param slotobj
+     * \param menu
+     * \return QMenu*
+     *
+     * \version 3.0.3
+     */
+    QMenu *buildMenu(QJsonArray arr,  QObject* slotobj, QMenu *menu = new QMenu());
 
     /*!
      * \brief ptrToString produces a unique name (memory address location) as a string for cases when a name is not provided

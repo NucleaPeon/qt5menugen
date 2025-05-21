@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SundayBeacon</string>
+   <string>Combining Menus</string>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>true</bool>

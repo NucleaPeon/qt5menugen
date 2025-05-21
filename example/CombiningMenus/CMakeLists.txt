@@ -6,7 +6,7 @@ project(CombiningMenus
 
 find_package(Qt5 REQUIRED Widgets)
 include(FindPkgConfig)
-find_package(qt5menugen CONFIG REQUIRED 2.3.2)
+find_package(qt5menugen CONFIG REQUIRED 3.0.3)
 
 if(APPLE)
 	find_package(Qt5 REQUIRED MacExtras)
@@ -23,6 +23,8 @@ set(CMAKE_AUTORCC ON)
 list(APPEND OTHER_TARGETS
         toolbar.json
         common.json
+        context.json
+        contextcommon.json
 )
 
 list(APPEND SHORTCUT_TESTER_HEADERS

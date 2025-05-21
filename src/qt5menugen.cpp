@@ -50,8 +50,8 @@ QtMenuGen::QtMenuGen(QList<QString> paths, bool separate_menus)
             load_shortcuts();
         }
     }
-	doc.setArray(arr);
-	this->jdoc = doc;
+    doc.setArray(arr);
+    this->jdoc = doc;
     this->loaded = true;
 }
 
@@ -159,7 +159,7 @@ void QtMenuGen::applySignalSlot(QObject *connector, const char *signal, QObject 
 
 void QtMenuGen::setup(QWidget *widget, QObject *slotobj)
 {
-	this->slotter = slotobj;
+    this->slotter = slotobj;
     mb = setupMenus(widget);
 #ifdef Q_OS_MAC
     tb = setupOSXToolBar(widget);
@@ -170,7 +170,7 @@ void QtMenuGen::setup(QWidget *widget, QObject *slotobj)
 
 void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
 {
-	this->slotter = slotobj;
+    this->slotter = slotobj;
     mb = setupMenus(window);
     window->setMenuBar(mb);
 #ifdef Q_OS_MAC
@@ -183,26 +183,30 @@ void QtMenuGen::setup(QMainWindow *window, QObject *slotobj)
 
 void QtMenuGen::setup(QMenu *menu, QObject *slotobj, QJsonObject obj)
 {
-	this->slotter = slotobj;
+    this->slotter = slotobj;
     if (obj.isEmpty()) { obj = this->jsonDocument().object(); }
-    // const QMetaObject *metaConn = slotobj->metaObject();
-	menu = setupMenu(menu, obj);
+    menu = setupMenu(menu, obj);
     menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
 }
 
 QMenu* QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, UpdateTypes type)
 {
-    // If it's not loaded, that usually implies a badly formatted json file.
+    // If it's not loaded, that usually implies a badly formatted json file or a bad path
     if (! menugenobj->isLoaded()) {
         qWarning("Cannot update() on a QtMenuGen* that hasn't been set up correctly.");
         return NULL;
     }
-
     QJsonDocument doc = menugenobj->jsonDocument();
     QMenu* menu;
+    QJsonArray arr;
+    QString name;
+
+    // Generate menu from json:
     if (doc.isArray()) {
         // It's something like a menu bar format with multi-menus
-
+        arr = doc.array();
+        menu = buildMenu(arr, slotobj);
+        name = ptrToString(menu);
     } else if (doc.isObject()) {
         // It's a single menu we can add immediately. Must have actions[], otherwise we convert it
         // to a single QAction.
@@ -210,40 +214,86 @@ QMenu* QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, UpdateTypes ty
         bool hasactions = obj.contains("actions");
         if (! hasactions) {
             menu = new QMenu();
-            menu->setTitle(ptrToString(menu));
+            name = ptrToString(menu);
             QList<QAction*> acts = QList<QAction*>();
             acts.append(buildAction(obj, slotobj, menu));
             menu->addActions(acts);
+            arr = QJsonArray();
+            arr.append(QJsonValue(obj));
         } else {
             menu = buildMenu(obj, slotobj);
+            name = menu->title().toLower().replace("&", ""); // title is set in buildMenu()
+            arr = obj.value("actions").toArray();
         }
-        menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
-        if (type == TOOLBAR) {
-            QJsonArray arr;
-            // Update the toolbar with our menu
-            if (hasactions) {
-                arr = obj.value("actions").toArray();
-                foreach(QJsonValue val, arr) {
+    }
+    if (type == TOOLBAR) {
+        // Update the toolbar with our menu
+        foreach(QJsonValue val, arr) {
 #ifdef Q_OS_MAC
-                    updateToolBar(this->tb, val, slotobj);
+            updateToolBar(this->tb, val, slotobj);
 #else
-                    updateToolBar(this->tb, val, slotobj);
+            updateToolBar(this->tb, val, slotobj);
 #endif
-                }
-            } else {
+        }
+    } else if (type == MENUBAR) {
+        this->mb->addMenu(menu);
+    }
+    // Add menu to menu_map, where menu is accessible:
+    if (type != NONE)
+        menu_map[name] = menu;
 
+    return menu;
+}
+
+QMenu *QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, QString menuTitle, UpdateStyle style, QString attachTo)
+{
+    // Build and fetch menu to be managed with update().
+    QMenu* menu = this->update(menugenobj, slotobj, NONE);
+    QList<QMenu*> menus;
+    if (menuTitle == "*") {
+        menus = menu_map.values();
+    } else {
+        menus = QList<QMenu*>();
+        if (menu_map.contains(menuTitle)) {
+            menus.append(menu_map.value(menuTitle));
+        } else {
+            if (menu_map.size() == 0) { return menu; }
+            menus.append(menu_map.first());
+        }
+    }
+    foreach(QMenu* m, menus) {
+        if (style == APPEND) {
+            m->addActions(menu->actions());
+        } else if (style == PREPEND) {
+            if (m->actions().length() == 0) {
+                m->addActions(menu->actions());
+            } else {
+                m->insertActions(m->actions().at(0), menu->actions());
             }
-        } else if (type == MENUBAR) {
-            this->mb->addMenu(menu);
-        } // If MENU, simply return the menu.
+        } else if (style == INSERT) {
+            if (! attachTo.isEmpty()) {
+                QAction* anchor = 0;
+                for(int i=0; i<m->actions().count(); ++i) {
+                    if (m->actions().at(i)->text() == attachTo) {
+                        anchor = m->actions().at(i);
+                        break;
+                    }
+                }
+                if (anchor != 0) {
+                    m->insertActions(anchor, menu->actions());
+                } else {
+                    m->addActions(menu->actions());
+                }
+            }
+        }
     }
     return menu;
 }
 
-QMenu *QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, QString append, QtMenuGen::UpdateTypes type, QtMenuGen::InjectionTypes inj)
-{
-    return new QMenu();
-}
+// QMenu *QtMenuGen::update(QtMenuGen *menugenobj, QObject *slotobj, QString append, QtMenuGen::UpdateTypes type, QtMenuGen::InjectionTypes inj)
+// {
+//     return new QMenu();
+// }
 
 
 QAction *QtMenuGen::actionByName(const QString name)
@@ -407,7 +457,7 @@ bool QtMenuGen::isValid(const QJsonObject obj)
     return (obj.contains("name") && (
             ! obj.value("icon").toString().isEmpty() ||
                 ! obj.value("text").toString().isEmpty() ||
-                	obj.contains("actions")) );
+                    obj.contains("actions")) );
 }
 
 void QtMenuGen::warn(QString message)
@@ -522,6 +572,32 @@ QMenu *QtMenuGen::buildMenu(QJsonObject obj, QObject *slotobj, QMenu* menu)
         menu->addAction(buildAction(actobj, slotobj, menu));
     }
     menu_map[obj.value("name").toString("").toLower().replace("&", "")] = menu;
+    return menu;
+}
+
+QMenu *QtMenuGen::buildMenu(QJsonArray arr,  QObject* slotobj, QMenu *menu)
+{
+    if (arr.isEmpty())
+        return menu;
+    menu->setTitle(ptrToString(menu));
+    foreach(QJsonValue actval, arr) {
+        QJsonObject actobj = actval.toObject();
+        if (actobj.contains("separator")) {
+            menu->addSeparator();
+            continue;
+        }
+        if (! isValid(actobj)) { continue; }
+
+        if (actobj.contains("actions")) {
+            QMenu *submenu = new QMenu();
+            submenu = buildMenu(actobj, slotobj, submenu);
+            menu->addMenu(submenu);
+            continue;
+        }
+        // This builds out the entire QAction with shortcuts, slots, everything etc.
+        menu->addAction(buildAction(actobj, slotobj, menu));
+    }
+    menu_map[ptrToString(menu)] = menu;
     return menu;
 }
 

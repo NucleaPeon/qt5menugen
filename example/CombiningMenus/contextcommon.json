@@ -1,0 +1,15 @@
+[
+    {
+        "separator": true
+    },
+    {
+        "name": "context-3",
+        "text": "Context 3",
+        "shortcut": "Ctrl+Alt+3"
+    },
+    {
+        "name": "context-4",
+        "text": "Context 4",
+        "shortcut": "Ctrl+Alt+4"
+    }
+]

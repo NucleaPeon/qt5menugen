@@ -1,0 +1,15 @@
+{
+    "name": "context-test",
+    "actions": [
+        {
+            "name": "context-1",
+            "text": "Context 1",
+            "shortcut": "Ctrl+Alt+1"
+        },
+        {
+            "name": "context-2",
+            "text": "Context 2",
+            "shortcut": "Ctrl+Alt+2"
+        }
+    ]
+}

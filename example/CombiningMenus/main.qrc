@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file alias="toolbar">toolbar.json</file>
         <file alias="common">common.json</file>
+        <file alias="context">context.json</file>
+        <file alias="contextcommon">contextcommon.json</file>
     </qresource>
 </RCC>

@@ -65,6 +65,47 @@
 Instead of having many QMenu and QAction declarations in your qt5 c++ header files, this library automates all ``QMenu``, ``QToolBar`` and ``QAction`` initialization based on the contents of a JSON file.
 
 
+
+
+### Prerequisites
+
+You will need:
+* git
+* cmake (for CMake builds)
+* clang >= 3 OR g++ >= 4.2 OR msvc
+* make (OS X and Linux)
+* autogen (sys-devel/autogen on Gentoo)
+* Qt5 >= 5.3.2 (Though 5.3.1 **may** also be acceptable)
+* For Windows 7:
+	* Visual Studio with MSBuild.exe on your ``PATH`` (I'm using VS 2013)
+	* Windows Driver Version kit (I'm using 7.1.0)
+	* Git Bash is useful for cli builds
+	* Ensure that Qt5_DIR environmental variable is set to something like ``C:\Qt\Qt5.3.1\5.3\msvc2013_opengl`` or ``C:\Qt\Qt5.3.2\5.3\msvc2013_64_opengl``
+	* Ensure your path to windeployqt is on ``PATH`` (``C:\Qt\Qt5.3.1\5.3\msvc2013_opengl\Bin``)
+
+With Qt6 available, we now allow setting of major qt versions. Default is 6, so to specify older versions, call with
+``-DQT_DEFAULT_MAJOR_VERSION=5``. Otherwise if using latest, this can be omitted.
+
+### Installation
+
+**Note** I recommend calling ``make -jN`` where ``N`` is the number of cores of your cpu. Calling ``make -j`` without a number should also use all cores.
+
+<hr>
+
+* Using cmake on Linux or Mac:
+
+  ```sh
+      cd build/
+      cmake -DCMAKE_INSTALL_PREFIX=/usr/ -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DQT_DEFAULT_MAJOR_VERSION=5 ..
+
+      make -j2
+      sudo make install
+  ```
+
+* For Windows 7 on Visual Studio 2013
+
+
+
 ### Using in your CMake Project
 
 In the recent v2.0.3 release, we now support ``find_package()`` as a way to determine package version.
@@ -273,40 +314,6 @@ Clone the repo:
 ```sh
     git clone https://github.com/NucleaPeon/qt5menugen.git
 ```
-
-
-### Prerequisites
-
-You will need:
-* git
-* cmake (for CMake builds)
-* clang >= 3 OR g++ >= 4.2 OR msvc
-* make (OS X and Linux)
-* Qt5 >= 5.3.2 (Though 5.3.1 **may** also be acceptable)
-* For Windows 7:
-	* Visual Studio with MSBuild.exe on your ``PATH`` (I'm using VS 2013)
-	* Windows Driver Version kit (I'm using 7.1.0)
-	* Git Bash is useful for cli builds
-	* Ensure that Qt5_DIR environmental variable is set to something like ``C:\Qt\Qt5.3.1\5.3\msvc2013_opengl`` or ``C:\Qt\Qt5.3.2\5.3\msvc2013_64_opengl``
-	* Ensure your path to windeployqt is on ``PATH`` (``C:\Qt\Qt5.3.1\5.3\msvc2013_opengl\Bin``)
-
-
-### Installation
-
-**Note** I recommend calling ``make -jN`` where ``N`` is the number of cores of your cpu. Calling ``make -j`` without a number should also use all cores.
-
-<hr>
-
-* Using cmake on Linux or Mac:
-
-  ```sh
-      cd build/
-      cmake -DCMAKE_INSTALL_PREFIX=/usr/ ..
-      make -j2
-      sudo make install
-  ```
-
-* For Windows 7 on Visual Studio 2013
 
 
 TODO

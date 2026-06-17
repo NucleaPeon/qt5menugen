@@ -14,12 +14,16 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 REQUIRED
+
+set(QT_DEFAULT_MAJOR_VERSION "6" CACHE STRING "Qt Version defaults to 6 (latest)")
+
+find_package(Qt${QT_DEFAULT_MAJOR_VERSION} NAMES Qt5 Qt6 REQUIRED COMPONENTS
     Core
     Widgets
     Gui
     Test
 )
+
 
 set(PACKAGE_HEADERS
   qt5menugen.h
@@ -41,7 +45,7 @@ add_library(${PROJECT_NAME}
 	${QT5MENUGEN_SOURCES}
 )
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
+target_link_libraries(${PROJECT_NAME} Qt${QT_DEFAULT_MAJOR_VERSION}::Widgets)
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
 
@@ -78,33 +82,42 @@ add_executable("${PROJECT_NAME}-tests"
 )
 
 if(APPLE)
-        find_package(Qt5 REQUIRED MacExtras)
-        target_link_libraries(${PROJECT_NAME} Qt5::MacExtras)
+        find_package(Qt NAMES Qt5 Qt6 REQUIRED COMPONENTS MacExtras)
+        target_link_libraries(${PROJECT_NAME} Qt${QT_DEFAULT_MAJOR_VERSION}::MacExtras)
 elseif(MSVC)
-        find_package(Qt5 HINTS "$ENV{QT5_DIR}" COMPONENTS Core Quick REQUIRED)
+        # Don't worry about qt6 on windows yet'
+        find_package(Qt${QT_DEFAULT_MAJOR_VERSION} NAMES Qt5 Qt6 HINTS "$ENV{QT${QT_DEFAULT_MAJOR_VERSION}_DIR}" COMPONENTS Core Quick REQUIRED)
         set(CMAKE_PREFIX_PATH "C:\\Qt\\5.3.1\\5.3\\msvc2013_opengl")
-        set(Qt5_DIR "C:/Qt/Qt5.3.2/5.3/msvc2013_64_opengl/")
-        find_package(Qt5 COMPONENTS WinExtras REQUIRED)
-        target_link_libraries(${PROJECT_NAME} Qt5::WinExtras)
+        set(Qt${QT_DEFAULT_MAJOR_VERSION}_DIR "C:/Qt/Qt5.3.2/5.3/msvc2013_64_opengl/")
+        find_package(Qt${QT_DEFAULT_MAJOR_VERSION} NAMES Qt5 Qt6 COMPONENTS WinExtras REQUIRED)
+        target_link_libraries(${PROJECT_NAME} Qt${QT_DEFAULT_MAJOR_VERSION}::WinExtras)
 endif()
 
 # Remove this line when deploying
-include_directories(BEFORE /usr/local/Qt-5.3.2/lib)
+# include_directories(BEFORE /usr/local/Qt-5.3.2/lib)
 target_include_directories(${PROJECT_NAME} BEFORE PRIVATE .. )
-target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Test)
-target_link_libraries("${PROJECT_NAME}-tests" Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Test)
+target_link_libraries(${PROJECT_NAME}
+    Qt${QT_DEFAULT_MAJOR_VERSION}::Core
+    Qt${QT_DEFAULT_MAJOR_VERSION}::Gui
+    Qt${QT_DEFAULT_MAJOR_VERSION}::Widgets
+    Qt${QT_DEFAULT_MAJOR_VERSION}::Test)
+target_link_libraries("${PROJECT_NAME}-tests"
+    Qt${QT_DEFAULT_MAJOR_VERSION}::Core
+    Qt${QT_DEFAULT_MAJOR_VERSION}::Gui
+    Qt${QT_DEFAULT_MAJOR_VERSION}::Widgets
+    Qt${QT_DEFAULT_MAJOR_VERSION}::Test)
 
 
-if(APPLE)
-	find_package(Qt5 REQUIRED MacExtras)
-	target_link_libraries(${PROJECT_NAME} Qt5::MacExtras)
-elseif(MSVC)
-	find_package(Qt5 HINTS "$ENV{QT5_DIR}" COMPONENTS Core Quick REQUIRED)
-	set(CMAKE_PREFIX_PATH "C:\\Qt\\5.3.1\\5.3\\msvc2013_opengl")
-	set(Qt5_DIR "C:/Qt/Qt5.3.2/5.3/msvc2013_64_opengl/")
-	find_package(Qt5 COMPONENTS WinExtras REQUIRED)
-	target_link_libraries(${PROJECT_NAME} Qt5::WinExtras)
-endif()
+# if(APPLE)
+# 	find_package(Qt5 REQUIRED MacExtras)
+# 	target_link_libraries(${PROJECT_NAME} Qt5::MacExtras)
+# elseif(MSVC)
+# 	find_package(Qt5 HINTS "$ENV{QT5_DIR}" COMPONENTS Core Quick REQUIRED)
+# 	set(CMAKE_PREFIX_PATH "C:\\Qt\\5.3.1\\5.3\\msvc2013_opengl")
+# 	set(Qt5_DIR "C:/Qt/Qt5.3.2/5.3/msvc2013_64_opengl/")
+# 	find_package(Qt5 COMPONENTS WinExtras REQUIRED)
+# 	target_link_libraries(${PROJECT_NAME} Qt5::WinExtras)
+# endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
 	SOVERSION 2

@@ -3,25 +3,28 @@
 
 #include "qt5menugen_global.h"
 
-#include <QtWidgets/QMainWindow>
 #include <QtCore/QMetaMethod>
-#include <QtWidgets/QWidget>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonValue>
 #include <QtCore/QJsonParseError>
-#include <QFile>
-#include <QUrl>
+#include <QtCore/QFile>
+#include <QtCore/QUrl>
 #include <QtCore/QHash>
 #include <QtCore/QList>
+#include <QtCore/QMap>
+
+// These may be in QtWidgets in qt5, confirm.
+#include <QtGui/QAction>
+#include <QtGui/QActionGroup>
+
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMenu>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QActionGroup>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QButtonGroup>
-#include <QtCore/QMap>
 
 #ifdef Q_OS_MAC
 #include <QtMacExtras/QMacToolBar>

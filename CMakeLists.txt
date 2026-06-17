@@ -120,7 +120,7 @@ target_link_libraries("${PROJECT_NAME}-tests"
 # endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
-	SOVERSION 2
+	SOVERSION 4
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${QT5MENUGEN_HEADERS}")
 configure_file(src/qt5menugen.pc.in src/qt5menugen.pc @ONLY)

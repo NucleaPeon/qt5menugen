@@ -1,5 +1,6 @@
 #ifndef QTMENUGEN_H
 #define QTMENUGEN_H
+#include <QtCore/QtGlobal>
 
 #include "qt5menugen_global.h"
 
@@ -16,8 +17,14 @@
 #include <QtCore/QMap>
 
 // These may be in QtWidgets in qt5, confirm.
+
+#if QT_VERSION >= 6
 #include <QtGui/QAction>
 #include <QtGui/QActionGroup>
+#else
+#include <QtWidgets/QAction>
+#include <QtWidgets/QActionGroup>
+#endif
 
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QMainWindow>

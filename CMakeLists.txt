@@ -48,8 +48,6 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} Qt${QT_DEFAULT_MAJOR_VERSION}::Widgets)
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
-
-
 list(APPEND TEST_SOURCES
     tests/test_runner.cpp
     tests/test_qwidget_menu.cpp
@@ -107,21 +105,10 @@ target_link_libraries("${PROJECT_NAME}-tests"
     Qt${QT_DEFAULT_MAJOR_VERSION}::Widgets
     Qt${QT_DEFAULT_MAJOR_VERSION}::Test)
 
-
-# if(APPLE)
-# 	find_package(Qt5 REQUIRED MacExtras)
-# 	target_link_libraries(${PROJECT_NAME} Qt5::MacExtras)
-# elseif(MSVC)
-# 	find_package(Qt5 HINTS "$ENV{QT5_DIR}" COMPONENTS Core Quick REQUIRED)
-# 	set(CMAKE_PREFIX_PATH "C:\\Qt\\5.3.1\\5.3\\msvc2013_opengl")
-# 	set(Qt5_DIR "C:/Qt/Qt5.3.2/5.3/msvc2013_64_opengl/")
-# 	find_package(Qt5 COMPONENTS WinExtras REQUIRED)
-# 	target_link_libraries(${PROJECT_NAME} Qt5::WinExtras)
-# endif()
-
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
 	SOVERSION 4
 )
+
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${QT5MENUGEN_HEADERS}")
 configure_file(src/qt5menugen.pc.in src/qt5menugen.pc @ONLY)
 
@@ -138,7 +125,6 @@ set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 set(SYSCONFIG_INSTALL_DIR ${CMAKE_INSTALL_SYSCONFDIR}/${PROJECT_NAME}
     CACHE PATH "Location of configuration files" )
 #...
-include(CMakePackageConfigHelpers)
 configure_package_config_file(${PROJECT_NAME}-config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}

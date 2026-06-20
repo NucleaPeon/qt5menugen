@@ -6,7 +6,7 @@ project(qt5menugen
         LANGUAGES CXX)
 
 include(GNUInstallDirs)  # REQUIRED TO INSTALL PKGCONFIG TO PROPER DIR, and after LANGUAGES is defined
-
+include(CMakePackageConfigHelpers)
 # Immediately set the version.h header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h)
 
@@ -23,6 +23,18 @@ find_package(Qt${QT_DEFAULT_MAJOR_VERSION} NAMES Qt5 Qt6 REQUIRED COMPONENTS
     Gui
     Test
 )
+
+message(STATUS "Using Qt${QT_DEFAULT_MAJOR_VERSION}")
+
+if(APPLE)
+        find_package(Qt${QT_DEFAULT_MAJOR_VERSION} NAMES Qt5 Qt6 REQUIRED COMPONENTS MacExtras)
+elseif(MSVC)
+        # Don't worry about qt6 on windows yet'
+        find_package(Qt${QT_DEFAULT_MAJOR_VERSION} NAMES Qt5 Qt6 HINTS "$ENV{QT${QT_DEFAULT_MAJOR_VERSION}_DIR}" COMPONENTS Core Quick REQUIRED)
+        set(CMAKE_PREFIX_PATH "C:\\Qt\\5.3.1\\5.3\\msvc2013_opengl")
+        set(Qt${QT_DEFAULT_MAJOR_VERSION}_DIR "C:/Qt/Qt5.3.2/5.3/msvc2013_64_opengl/")
+        find_package(Qt${QT_DEFAULT_MAJOR_VERSION} NAMES Qt5 Qt6 COMPONENTS WinExtras REQUIRED)
+endif()
 
 
 set(PACKAGE_HEADERS
@@ -45,7 +57,6 @@ add_library(${PROJECT_NAME}
 	${QT5MENUGEN_SOURCES}
 )
 
-target_link_libraries(${PROJECT_NAME} Qt${QT_DEFAULT_MAJOR_VERSION}::Widgets)
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
 list(APPEND TEST_SOURCES
@@ -79,26 +90,17 @@ add_executable("${PROJECT_NAME}-tests"
     ${TEST_RES}
 )
 
-if(APPLE)
-        find_package(Qt NAMES Qt5 Qt6 REQUIRED COMPONENTS MacExtras)
-        target_link_libraries(${PROJECT_NAME} Qt${QT_DEFAULT_MAJOR_VERSION}::MacExtras)
-elseif(MSVC)
-        # Don't worry about qt6 on windows yet'
-        find_package(Qt${QT_DEFAULT_MAJOR_VERSION} NAMES Qt5 Qt6 HINTS "$ENV{QT${QT_DEFAULT_MAJOR_VERSION}_DIR}" COMPONENTS Core Quick REQUIRED)
-        set(CMAKE_PREFIX_PATH "C:\\Qt\\5.3.1\\5.3\\msvc2013_opengl")
-        set(Qt${QT_DEFAULT_MAJOR_VERSION}_DIR "C:/Qt/Qt5.3.2/5.3/msvc2013_64_opengl/")
-        find_package(Qt${QT_DEFAULT_MAJOR_VERSION} NAMES Qt5 Qt6 COMPONENTS WinExtras REQUIRED)
-        target_link_libraries(${PROJECT_NAME} Qt${QT_DEFAULT_MAJOR_VERSION}::WinExtras)
-endif()
 
 # Remove this line when deploying
 # include_directories(BEFORE /usr/local/Qt-5.3.2/lib)
 target_include_directories(${PROJECT_NAME} BEFORE PRIVATE .. )
+
 target_link_libraries(${PROJECT_NAME}
     Qt${QT_DEFAULT_MAJOR_VERSION}::Core
     Qt${QT_DEFAULT_MAJOR_VERSION}::Gui
     Qt${QT_DEFAULT_MAJOR_VERSION}::Widgets
     Qt${QT_DEFAULT_MAJOR_VERSION}::Test)
+
 target_link_libraries("${PROJECT_NAME}-tests"
     Qt${QT_DEFAULT_MAJOR_VERSION}::Core
     Qt${QT_DEFAULT_MAJOR_VERSION}::Gui
@@ -116,7 +118,7 @@ install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-include(CMakePackageConfigHelpers)
+
 # Create directory
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
@@ -125,6 +127,7 @@ set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 set(SYSCONFIG_INSTALL_DIR ${CMAKE_INSTALL_SYSCONFDIR}/${PROJECT_NAME}
     CACHE PATH "Location of configuration files" )
 #...
+
 configure_package_config_file(${PROJECT_NAME}-config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
@@ -139,4 +142,8 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
 install(FILES ${CMAKE_BINARY_DIR}/src/qt5menugen.pc DESTINATION
 	${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 
-
+if(APPLE)
+    target_link_libraries(${PROJECT_NAME} Qt${QT_DEFAULT_MAJOR_VERSION}::MacExtras)
+elseif(MSVC)
+    target_link_libraries(${PROJECT_NAME} Qt${QT_DEFAULT_MAJOR_VERSION}::WinExtras)
+endif()

@@ -18,12 +18,12 @@
 
 // These may be in QtWidgets in qt5, confirm.
 
-#if QT_VERSION >= 6
-#include <QtGui/QAction>
-#include <QtGui/QActionGroup>
-#else
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #include <QtWidgets/QAction>
 #include <QtWidgets/QActionGroup>
+#else
+#include <QtGui/QAction>
+#include <QtGui/QActionGroup>
 #endif
 
 #include <QtWidgets/QWidget>

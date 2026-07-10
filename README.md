@@ -360,9 +360,7 @@ See the included ``example/`` project for including it in a project.
 
 ## Troubleshooting and Workarounds
 
-* If you find you are only seeing one menu in OS X (ie: just "File") even when you have menus specified in menus such as "Edit", the problem may be because
-"Edit" only has one menu item entry. Solution is to ensure you have at least two items in the menu. I'm not sure if this is a qt5menugen bug,
-an OS X bug or a Qt 5.3.2 bug, but it's frustrating and more investigation is needed. (TODO: Create an example code directory that examines this)
+* OS X has certain menu items (Preferences, About) that will not appear as defined since they are placed in the global apple menu. This is normal behavior.
 * While testing ``update()`` on OS X 10.6, any menu entries in the target ``.json`` update file will NOT show up in the toolbar. The workaround is to have all the toolbar items you want in the main toolbar ``.json`` file for now. I will investigate perhaps adding in an objective c file that contains code for dynamically adding in toolbar items using ``NSToolbar``, but that is low priority for now. Not sure if this issue appears in later OS X versions or if it's a QT5.3 version issue.
 ** You can use the 2.3.2 version constructor to pass in all your json files before setup so your toolbars are correct while not having to duplicate code. See the CombiningMenus example for how to handle MAC_OS if you want to still use update() on other OS's.
 
